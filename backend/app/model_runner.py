@@ -1,16 +1,18 @@
-"""Phase-A DR classifier wrapper + Grad-CAM for KoʻzNur.
+"""KoʻzNur serving engine — SE-ResNeXt50 diabetic-retinopathy grader.
 
-Wraps Kontawat/vit-diabetic-retinopathy-classification (ViT-Base/16,
-ViTForImageClassification, apache-2.0). Verified against the live HF config:
-  - preprocessor uses resize(224) + rescale(/255) + normalize(mean=std=0.5),
-    NOT ImageNet stats. We let the bundled ViTImageProcessor do this so we
-    never hardcode the wrong constants (the #1 silent-failure risk).
-  - id2label = {0..4} is already in canonical ICDR order, so argmax index ==
-    ICDR grade and `referable = grade >= 2` is correct directly.
+INTEGRATED REFERENCE MODEL (not weights we trained ourselves):
+  Openly published, MIT-licensed APTOS-2019 solution by `4uiiurz1`
+  (https://github.com/4uiiurz1/kaggle-aptos2019-blindness-detection,
+  private leaderboard QWK 0.930). See REFERENCE_MODEL.md for full provenance
+  and the upstream MIT license. We use the released weights as the
+  production reference engine; our own trained baseline lives separately
+  under train/ with its own metrics. Predictions here are real model
+  outputs — never fabricated.
 
-Honest framing (ARCHITECTURE.md §6): this is a demo engine. Predictions are
-real model outputs — never fabricated — but no KoʻzNur-measured accuracy is
-claimed. Phase B produces our own weights + metrics.json.
+Inference pipeline replicates the original exactly:
+  scale-radius (Ben Graham) crop @288  ->  resize 256  ->  ImageNet normalize
+  ->  SE-ResNeXt50 (regression, 1 output)  ->  round at [0.5,1.5,2.5,3.5].
+Ensembles the 5 cross-validation folds (mean of regression outputs).
 """
 
 from __future__ import annotations
@@ -20,22 +22,28 @@ import io
 import logging
 import threading
 
+import cv2
 import numpy as np
 import torch
+import torch.nn as nn
+import torchvision.transforms as T
+import pretrainedmodels
 from PIL import Image
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
-from transformers import AutoImageProcessor, AutoModelForImageClassification
 
 from . import config
-from .preprocessing import preprocess
 
 logger = logging.getLogger("koznur.model")
 
+_WEIGHTS_DIR = config.BACKEND_DIR / "models" / "aptos_winner" / "se_resnext50_32x4d"
+_THRS = [0.5, 1.5, 2.5, 3.5]      # regression -> ICDR grade (their thresholds)
+_INPUT = 256                       # model input size
+_SCALE_IMG = 288                   # scale-radius target diameter
+
 
 def _select_device() -> str:
-    """Prefer MPS (Apple Silicon) per ARCHITECTURE.md §5; fall back to CPU."""
     if torch.backends.mps.is_available():
         return "mps"
     if torch.cuda.is_available():
@@ -43,157 +51,120 @@ def _select_device() -> str:
     return "cpu"
 
 
-class _LogitsOnly(torch.nn.Module):
-    """Adapter so pytorch-grad-cam sees a plain logits tensor.
+def _scale_radius(src: np.ndarray, img_size: int = _SCALE_IMG) -> np.ndarray:
+    """Ben Graham retina crop: find fundus radius + centroid, crop, rescale so
+    the retina diameter == img_size. Falls back to a plain resize on failure."""
+    try:
+        x = src[src.shape[0] // 2, ...].sum(axis=1)
+        r = int((x > x.mean() / 10).sum() // 2)
+        if r < 10:
+            raise ValueError("tiny radius")
+        yx = src.sum(axis=2)
+        ys, xs = np.nonzero(yx > yx.mean() / 10)
+        yc, xc = int(round(ys.mean())), int(round(xs.mean()))
+        x1, x2 = max(xc - r, 0), min(xc + r, src.shape[1] - 1)
+        y1, y2 = max(yc - r, 0), min(yc + r, src.shape[0] - 1)
+        dst = src[y1:y2, x1:x2]
+        return cv2.resize(dst, None, fx=img_size / (2 * r), fy=img_size / (2 * r))
+    except Exception:
+        return cv2.resize(src, (img_size, img_size))
 
-    ViTForImageClassification returns an ``ImageClassifierOutput`` (a dict-like
-    object), but pytorch-grad-cam's ClassifierOutputTarget expects the model's
-    forward to return the logits tensor directly. This thin wrapper unwraps
-    ``.logits`` while keeping the underlying module (and its hooks) intact.
-    """
 
-    def __init__(self, model: torch.nn.Module) -> None:
-        super().__init__()
-        self.model = model
-
-    def forward(self, pixel_values: torch.Tensor) -> torch.Tensor:
-        return self.model(pixel_values=pixel_values).logits
+_TFM = T.Compose([
+    T.Resize((_INPUT, _INPUT)),
+    T.ToTensor(),
+    T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+])
 
 
-def _vit_reshape_transform(tensor: torch.Tensor, h: int = 14, w: int = 14):
-    """Drop the CLS token and reshape 196 patch tokens -> a 14x14 grid.
+def _build() -> nn.Module:
+    m = pretrainedmodels.se_resnext50_32x4d(num_classes=1000, pretrained=None)
+    m.avg_pool = nn.AdaptiveAvgPool2d(1)
+    m.last_linear = nn.Linear(2048, 1)   # regression head
+    return m
 
-    224 / 16 = 14 patches per side. Required because ViT tokens are
-    [B, 197, C], not a spatial conv map. Standard pytorch-grad-cam ViT recipe.
-    """
-    result = tensor[:, 1:, :].reshape(tensor.size(0), h, w, tensor.size(-1))
-    return result.permute(0, 3, 1, 2)  # [B, C, 14, 14]
+
+def _soft_probs(reg: float, sigma: float = 0.7) -> np.ndarray:
+    """Derive a 5-way pseudo-distribution from the regression value, so the UI
+    keeps a probabilities[5] + confidence. Honest: it reflects how close the
+    regression output is to each integer ICDR grade, not a softmax."""
+    grades = np.arange(5)
+    w = np.exp(-((grades - reg) ** 2) / (2 * sigma * sigma))
+    return w / w.sum()
 
 
 class DRModel:
-    """Singleton-style wrapper: load once at startup, serve many requests."""
+    """Load the 5-fold SE-ResNeXt50 ensemble once; serve many requests."""
 
     def __init__(self) -> None:
-        self.device: str = _select_device()
-        self.processor = None
-        self.model = None
+        self.device = _select_device()
+        self.models: list[nn.Module] = []
         self._cam = None
-        self._cam_target_layers = None
-        self._lock = threading.Lock()  # serialize Grad-CAM (needs grad + state)
+        self._cam_model = None
+        self._lock = threading.Lock()
         self._loaded = False
 
-    # -- lifecycle ---------------------------------------------------------
     def load(self) -> None:
-        """Resolve + load the checkpoint. Idempotent; call at FastAPI startup."""
         if self._loaded:
             return
-        source = config.MODEL_LOCAL_DIR or config.MODEL_ID
-        logger.info("Loading DR model '%s' onto device '%s' ...", source, self.device)
-
-        # The repo ships pytorch_model.bin only (no safetensors) — do NOT pass
-        # use_safetensors=True; transformers handles the .bin load path.
-        self.processor = AutoImageProcessor.from_pretrained(source)
-        self.model = AutoModelForImageClassification.from_pretrained(source)
-        self.model.to(self.device).eval()
-
-        # Grad-CAM target: LayerNorm at the input of the last transformer block.
-        # (A LayerNorm, NOT a conv — the stable pytorch-grad-cam ViT choice.)
-        # The target layer must reference the SAME module object Grad-CAM runs
-        # forward on, so resolve it through the _LogitsOnly wrapper.
-        self._cam_model = _LogitsOnly(self.model)
-        self._cam_target_layers = [
-            self._cam_model.model.vit.encoder.layer[-1].layernorm_before
-        ]
-        self._cam = GradCAM(
-            model=self._cam_model,
-            target_layers=self._cam_target_layers,
-            reshape_transform=_vit_reshape_transform,
-        )
+        logger.info("Loading SE-ResNeXt50 5-fold ensemble from %s on %s",
+                    _WEIGHTS_DIR, self.device)
+        for f in range(1, 6):
+            m = _build()
+            sd = torch.load(_WEIGHTS_DIR / f"model_{f}.pth",
+                            map_location="cpu", weights_only=True)
+            m.load_state_dict(sd)
+            self.models.append(m.eval().to(self.device))
+        # Grad-CAM on the best fold (fold 2, CV QWK 0.933); last conv block.
+        self._cam_model = self.models[1]
+        self._cam = GradCAM(model=self._cam_model,
+                            target_layers=[self._cam_model.layer4[-1]])
         self._loaded = True
-        logger.info("DR model loaded. id2label=%s", self.model.config.id2label)
+        logger.info("SE-ResNeXt50 ensemble loaded (%d folds).", len(self.models))
 
     @property
     def is_loaded(self) -> bool:
         return self._loaded
 
-    # -- inference ---------------------------------------------------------
     def predict(self, pil_img: Image.Image) -> dict:
-        """Full pipeline: preprocess -> classify -> Grad-CAM -> contract JSON.
-
-        Returns a dict matching ARCHITECTURE.md §5 exactly:
-          grade, grade_label, referable, confidence, probabilities,
-          gradcam_png_base64, recommendation
-        """
         if not self._loaded:
             raise RuntimeError("Model not loaded. Call load() at startup.")
-
-        # Steps (1)-(3): RGB + retina crop (+ optional Ben Graham).
-        clean = preprocess(
-            pil_img,
-            enable_retina_crop=config.ENABLE_RETINA_CROP,
-            enable_ben_graham=config.ENABLE_BEN_GRAHAM,
-        )
-
-        # Steps (4)-(6): resize/rescale/normalize handled by the bundled
-        # ViTImageProcessor — mean=std=0.5, /255. Never hardcode ImageNet stats.
-        inputs = self.processor(images=clean, return_tensors="pt")
-        pixel_values = inputs["pixel_values"].to(self.device)
+        rgb = np.asarray(pil_img.convert("RGB"))
+        cropped = _scale_radius(rgb)
+        x = _TFM(Image.fromarray(cropped)).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
-            logits = self.model(pixel_values=pixel_values).logits  # [1, 5]
-            probs = torch.softmax(logits, dim=-1)[0]
+            regs = [float(m(x).cpu().numpy()[0, 0]) for m in self.models]
+        reg = float(np.mean(regs))
 
-        grade = int(torch.argmax(probs).item())
-        probabilities = [round(float(p), 4) for p in probs]  # ICDR order 0..4
-        confidence = round(float(probs[grade].item()), 4)
-        referable = grade >= config.REFERABLE_THRESHOLD
+        grade = int(np.digitize([reg], _THRS)[0])           # 0..4
+        probs = _soft_probs(reg)
+        confidence = round(float(probs[grade]), 4)
+        referable = bool(reg >= _THRS[1])                    # grade >= 2
 
-        gradcam_b64 = self._gradcam_overlay(pixel_values, clean, grade)
-
+        gradcam_b64 = self._gradcam(x, cropped)
         return {
             "grade": grade,
             "grade_label": config.ICDR_LABELS[grade],
             "referable": referable,
             "confidence": confidence,
-            "probabilities": probabilities,
+            "probabilities": [round(float(p), 4) for p in probs],
             "gradcam_png_base64": gradcam_b64,
             "recommendation": (
-                config.RECOMMENDATION_REFERABLE
-                if referable
+                config.RECOMMENDATION_REFERABLE if referable
                 else config.RECOMMENDATION_OK
             ),
         }
 
-    # -- Grad-CAM ----------------------------------------------------------
-    def _gradcam_overlay(
-        self, pixel_values: torch.Tensor, clean_img: Image.Image, grade: int
-    ) -> str:
-        """Produce a base64 PNG: 14x14 CAM upsampled to 224, overlaid on fundus.
-
-        Highlights hemorrhage / exudate regions for the predicted grade — the
-        ARCHITECTURE.md §4 explainability differentiator. Serialized with a lock
-        because Grad-CAM toggles gradients/hooks on the shared model.
-        """
+    def _gradcam(self, x: torch.Tensor, cropped_rgb: np.ndarray) -> str:
+        """CAM for the regression output (regions driving higher severity)."""
         with self._lock:
-            grayscale_cam = self._cam(
-                input_tensor=pixel_values,
-                targets=[ClassifierOutputTarget(grade)],
-            )[0]  # (224, 224) float in [0, 1]
-
-        # Base image to overlay on = the same 224x224 the model saw, but in
-        # plain [0,1] RGB (NOT the 0.5-normalized tensor) so the fundus colours
-        # look natural under the heatmap.
-        base = clean_img.resize((224, 224), Image.BILINEAR)
-        base_rgb = np.asarray(base, dtype=np.float32) / 255.0
-
-        overlay = show_cam_on_image(base_rgb, grayscale_cam, use_rgb=True)
-        return self._png_to_base64(overlay)
-
-    @staticmethod
-    def _png_to_base64(rgb_array: np.ndarray) -> str:
-        """uint8 RGB (H, W, 3) -> base64-encoded PNG string (no data: prefix)."""
+            cam = self._cam(input_tensor=x,
+                            targets=[ClassifierOutputTarget(0)])[0]
+        base = cv2.resize(cropped_rgb, (_INPUT, _INPUT)).astype(np.float32) / 255.0
+        overlay = show_cam_on_image(base, cam, use_rgb=True)
         buf = io.BytesIO()
-        Image.fromarray(rgb_array.astype(np.uint8), mode="RGB").save(buf, format="PNG")
+        Image.fromarray(overlay.astype(np.uint8), "RGB").save(buf, format="PNG")
         return base64.b64encode(buf.getvalue()).decode("ascii")
 
 
