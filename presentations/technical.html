@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KoʻzNur — Texnik taqdimot · Zeno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --shell:#0E1A24; --shell-2:#16242E;
+  --paper:#F6F8F9; --ink:#0E1A24; --muted:#5A6B7B; --hair:#D9E6EA;
+  --teal:#0FB5BA; --teal-d:#0F838C; --amber:#E8833A; --white:#FFFFFF;
+  --g0:#1F9D74; --g1:#7FB23A; --g2:#E0A82E; --g3:#DB7C26; --g4:#C0392B;
+  --disp:"Space Grotesk",sans-serif; --mono:"JetBrains Mono",monospace; --body:"Inter",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#05090d;font-family:var(--body);color:var(--ink);overflow:hidden}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.ml{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-weight:500}
+
+/* ---------- DECK SHELL ---------- */
+#deck{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.slide{
+  position:absolute;width:100vw;height:100vh;
+  display:none;flex-direction:column;
+  opacity:0;
+}
+.slide.active{display:flex;animation:settle .5s cubic-bezier(.22,.61,.36,1) forwards}
+@keyframes settle{from{opacity:0;transform:translateY(14px) scale(.995)}to{opacity:1;transform:none}}
+
+/* 16:9 stage that fits the viewport */
+.stage{
+  position:relative;width:100%;height:100%;
+  display:flex;flex-direction:column;
+  padding:4.4vh 5.2vw 0 5.2vw;
+}
+.slide.dark .stage{background:var(--shell)}
+.slide.light .stage{background:var(--paper)}
+
+/* engineering grid */
+.grid-bg{position:absolute;inset:0;pointer-events:none;z-index:0}
+.dark .grid-bg{
+  background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:46px 46px;
+}
+.light .grid-bg{
+  background-image:linear-gradient(rgba(14,26,36,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(14,26,36,.04) 1px,transparent 1px);
+  background-size:46px 46px;
+}
+.stage>*{position:relative;z-index:1}
+
+/* corner reticles */
+.reticle{position:absolute;width:16px;height:16px;z-index:2;opacity:.55}
+.reticle::before,.reticle::after{content:"";position:absolute;background:var(--teal)}
+.reticle::before{width:16px;height:1px;top:0;left:0}.reticle::after{width:1px;height:16px;top:0;left:0}
+.r-tl{top:18px;left:18px}.r-tr{top:18px;right:18px;transform:scaleX(-1)}
+.r-bl{bottom:78px;left:18px;transform:scaleY(-1)}.r-br{bottom:78px;right:18px;transform:scale(-1)}
+
+/* ---------- SLIDE FURNITURE ---------- */
+.eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.eyebrow .tick{width:22px;height:1px;background:var(--teal-d)}
+.dark .eyebrow{color:var(--teal)}
+.light .eyebrow .lbl{color:var(--teal-d)}
+.light .eyebrow .num{color:var(--muted)}
+.dark .eyebrow .num{color:#6f8694}
+
+h1.title{font-family:var(--disp);font-weight:600;letter-spacing:-.02em;line-height:1.02}
+h2.head{font-family:var(--disp);font-weight:600;letter-spacing:-.018em;line-height:1.04;font-size:clamp(26px,3.5vw,46px)}
+.dark h2.head,.dark h1.title{color:var(--white)}
+.light h2.head{color:var(--ink)}
+.sub{font-size:clamp(14px,1.35vw,18px);line-height:1.5;max-width:62ch}
+.light .sub{color:var(--muted)}.dark .sub{color:#9fb2bd}
+
+/* footer */
+.foot{
+  position:absolute;left:0;right:0;bottom:0;height:58px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 5.2vw;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;z-index:3;
+}
+.light .foot{border-top:1px solid var(--hair);color:var(--muted)}
+.dark .foot{border-top:1px solid rgba(255,255,255,.08);color:#6f8694}
+.foot .dot{color:var(--teal-d)}
+
+/* progress + counter */
+#progress{position:fixed;top:0;left:0;height:2px;background:var(--teal);z-index:50;transition:width .4s ease}
+#counter{position:fixed;top:14px;right:18px;z-index:50;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--muted)}
+.dark-ctx #counter{color:#6f8694}
+
+/* generic content helpers */
+.content{flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:58px}
+.hair{height:1px;background:var(--hair)}
+.dark .hair{background:rgba(255,255,255,.1)}
+
+/* cards */
+.card{background:var(--white);border:1px solid var(--hair);border-radius:4px;padding:20px 22px}
+.dark .card{background:var(--shell-2);border-color:rgba(255,255,255,.09)}
+.stat-val{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1}
+.stat-lbl{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:10.5px;color:var(--muted);margin-bottom:10px}
+.dark .stat-lbl{color:#7f96a3}
+.note{font-size:12.5px;line-height:1.5;color:var(--muted)}
+.dark .note{color:#9fb2bd}
+
+/* device mount for screenshots */
+.mount{position:relative;background:#0A1219;border:1px solid rgba(15,181,186,.32);border-radius:8px;padding:12px}
+.mount img{display:block;width:100%;border-radius:3px}
+.mount .m-tl,.mount .m-tr,.mount .m-bl,.mount .m-br{position:absolute;width:13px;height:13px;opacity:.7}
+.mount .m-tl::before,.mount .m-tr::before,.mount .m-bl::before,.mount .m-br::before,
+.mount .m-tl::after,.mount .m-tr::after,.mount .m-bl::after,.mount .m-br::after{content:"";position:absolute;background:var(--teal)}
+.mount .m-tl::before,.mount .m-tr::before,.mount .m-bl::before,.mount .m-br::before{width:13px;height:1px}
+.mount .m-tl::after,.mount .m-tr::after,.mount .m-bl::after,.mount .m-br::after{width:1px;height:13px}
+.mount .m-tl{top:6px;left:6px}.mount .m-tr{top:6px;right:6px;transform:scaleX(-1)}
+.mount .m-bl{bottom:6px;left:6px;transform:scaleY(-1)}.mount .m-br{bottom:6px;right:6px;transform:scale(-1)}
+.m-cap{position:absolute;top:6px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:#5a7280;text-transform:uppercase}
+
+/* grade ramp chip */
+.gchip{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px}
+.gdot{width:9px;height:9px;border-radius:2px;display:inline-block}
+
+/* pipeline step */
+.pstep{display:flex;gap:16px;align-items:flex-start;padding:13px 0;border-top:1px solid var(--hair)}
+.pstep:last-child{border-bottom:1px solid var(--hair)}
+.pn{font-family:var(--mono);font-weight:600;color:var(--teal-d);font-size:13px;min-width:30px;letter-spacing:.04em}
+.pttl{font-family:var(--disp);font-weight:500;font-size:15px;color:var(--ink);margin-bottom:3px}
+.pdesc{font-size:12.5px;color:var(--muted);line-height:1.45}
+.pcode{font-family:var(--mono);font-size:11px;color:var(--teal-d)}
+
+/* lever rows */
+.lever{display:grid;grid-template-columns:26px 1fr auto;gap:14px;align-items:center;padding:11px 0;border-top:1px solid var(--hair)}
+.lever:last-child{border-bottom:1px solid var(--hair)}
+.lrank{font-family:var(--mono);font-weight:600;color:var(--muted);font-size:12px}
+.lname{font-weight:500;font-size:14px;color:var(--ink)}
+.lname small{display:block;font-weight:400;color:var(--muted);font-size:11.5px;margin-top:2px;font-family:var(--body)}
+.lbar{width:120px;height:6px;background:var(--hair);border-radius:3px;overflow:hidden}
+.lfill{height:100%;background:var(--teal-d);width:0;transition:width 1s cubic-bezier(.22,.61,.36,1)}
+
+/* JSON block */
+.json{font-family:var(--mono);font-size:11.5px;line-height:1.7;background:#0A1219;border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:16px 18px;color:#cfe0e6}
+.json .k{color:#7fd6da}.json .s{color:#9fd28a}.json .n{color:#e0b06a}.json .b{color:var(--amber)}.json .c{color:#5a7280}
+
+/* bars chart */
+.bchart{display:flex;flex-direction:column;gap:9px}
+.brow{display:grid;grid-template-columns:130px 1fr 48px;gap:12px;align-items:center}
+.blbl{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;text-align:right}
+.btrack{height:18px;background:var(--hair);border-radius:3px;overflow:hidden}
+.bfill{height:100%;width:0;border-radius:3px;transition:width 1.1s cubic-bezier(.22,.61,.36,1)}
+.bval{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink);text-align:left}
+
+/* title slide brandmark */
+.brand-reticle{width:44px;height:44px;position:relative}
+.brand-reticle .ring{position:absolute;inset:0;border:1.5px solid var(--teal);border-radius:50%}
+.brand-reticle .ring2{position:absolute;inset:11px;border:1.5px solid var(--teal-d);border-radius:50%}
+.brand-reticle .cx,.brand-reticle .cy{position:absolute;background:var(--teal)}
+.brand-reticle .cx{left:50%;top:-6px;bottom:-6px;width:1px;transform:translateX(-.5px)}
+.brand-reticle .cy{top:50%;left:-6px;right:-6px;height:1px;transform:translateY(-.5px)}
+.brand-reticle .core{position:absolute;inset:19px;background:var(--teal);border-radius:50%}
+
+.kbd{font-family:var(--mono);font-size:10px;border:1px solid var(--hair);border-radius:3px;padding:2px 6px;color:var(--muted)}
+.dark .kbd{border-color:rgba(255,255,255,.16);color:#9fb2bd}
+
+.amberbox{border-left:2px solid var(--amber);background:rgba(232,131,58,.07);padding:13px 16px;border-radius:0 4px 4px 0}
+.amberbox .at{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:10px;color:var(--amber);margin-bottom:5px}
+
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:4px 9px;border:1px solid var(--hair);border-radius:3px;color:var(--muted)}
+.dark .tag{border-color:rgba(255,255,255,.14);color:#9fb2bd}
+.tag.teal{border-color:rgba(15,131,140,.4);color:var(--teal-d)}
+
+ul.clean{list-style:none}
+ul.clean li{position:relative;padding-left:20px;margin-bottom:11px;font-size:13.5px;line-height:1.5;color:var(--ink)}
+ul.clean li::before{content:"";position:absolute;left:0;top:8px;width:7px;height:7px;border:1px solid var(--teal-d);border-radius:1px}
+ul.clean li b{font-weight:600}
+ul.clean li small{color:var(--muted)}
+
+@media (prefers-reduced-motion: reduce){
+  .slide.active{animation:none;opacity:1}
+  .lfill,.bfill,.gauge-mark{transition:none !important}
+}
+
+/* ---------- PRINT ---------- */
+@page{size:16in 9in;margin:0}
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #progress,#counter,.help{display:none !important}
+  .slide{display:flex !important;opacity:1 !important;position:relative;width:16in;height:9in;page-break-after:always;animation:none}
+  #deck{position:static;display:block}
+  .stage{padding:0.5in 0.6in 0 0.6in}
+  .foot{padding:0 0.6in}
+}
+.help{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:50;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:#46606e;text-transform:uppercase;opacity:.0;transition:opacity .3s}
+#deck:hover ~ .help,.help.show{opacity:.7}
+</style>
+</head>
+<body class="dark-ctx">
+
+<div id="progress"></div>
+<div id="counter">01 / 15</div>
+
+<div id="deck">
+
+<!-- ========== 1 · TITLE ========== -->
+<section class="slide dark active" data-ctx="dark">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <span class="reticle r-tl"></span><span class="reticle r-tr"></span><span class="reticle r-bl"></span><span class="reticle r-br"></span>
+    <div class="content" style="justify-content:center">
+      <div style="display:flex;align-items:center;gap:18px;margin-bottom:34px">
+        <div class="brand-reticle"><span class="ring"></span><span class="ring2"></span><span class="cx"></span><span class="cy"></span><span class="core"></span></div>
+        <div>
+          <div style="font-family:var(--disp);font-weight:600;font-size:26px;color:#fff;letter-spacing:-.01em">KoʻzNur</div>
+          <div class="ml" style="color:var(--teal);margin-top:2px">RETINAL SCREENING CONSOLE</div>
+        </div>
+      </div>
+      <h1 class="title" style="font-size:clamp(38px,6vw,82px);color:#fff;max-width:18ch">Diabetik retinopatiyani sekundlarda saralash.</h1>
+      <p class="sub" style="margin-top:22px">Fundus suratidan ICDR 0–4 darajasi, yoʻnaltirish belgisi va Grad-CAM izohi.
+      Mutaxassis baholash quvvatini kengaytiruvchi AI triaj — diagnoz emas.</p>
+      <div style="display:flex;gap:10px;margin-top:30px">
+        <span class="tag teal">TEXNIK TAQDIMOT</span>
+        <span class="tag">SE-RESNEXT50 · 5-FOLD</span>
+        <span class="tag">GRAD-CAM</span>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b style="color:var(--teal-d)">ZENO</b> · KOʻZNUR</span><span>UMUMMILLIY AI HACKATHON · GULISTON 2026</span></div>
+</section>
+
+<!-- ========== 2 · PROBLEM ========== -->
+<section class="slide light" data-ctx="light">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <div class="eyebrow"><span class="tick"></span><span class="ml lbl">MUAMMO</span><span class="ml num">/ 02</span></div>
+    <h2 class="head" style="max-width:20ch">Tor joy — kameralar emas, mutaxassis baholash quvvati.</h2>
+    <div class="content" style="padding-top:26px">
+      <div style="display:grid;grid-template-columns:1.05fr 1fr;gap:46px;align-items:center">
+        <div>
+          <p class="sub" style="margin-bottom:22px">Diabetik retinopatiya — mehnatga layoqatli yoshda <b style="color:var(--ink)">oldini olish mumkin boʻlgan koʻrlikning</b> yetakchi sababi. Koʻrish yoʻqolgunicha jim kechadi; har bir diabet bemori davriy retinal skrining talab qiladi.</p>
+          <p class="sub">Skrining tarmogʻi mavjud — lekin har bir fundus tasvirini <b style="color:var(--ink)">oftalmolog baholashi</b> kerak. Mutaxassislar kam va shaharlarda toʻplangan. Asl tiqilinch — baholash oʻtkazuvchanligi.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="card"><div class="stat-lbl">DIABET (KATTALAR)</div><div class="stat-val" style="font-size:34px;color:var(--ink)">~1.5M</div><div class="note" style="margin-top:6px">IDF 2024 · 2050 ga ~2.2M</div></div>
+          <div class="card"><div class="stat-lbl">QANDAYDIR DR</div><div class="stat-val" style="font-size:34px;color:var(--g2)">~520k</div><div class="note" style="margin-top:6px">~34.6% · Yau 2012</div></div>
+          <div class="card"><div class="stat-lbl">KOʻRISHGA XAVF</div><div class="stat-val" style="font-size:34px;color:var(--g4)">~150k</div><div class="note" style="margin-top:6px">~10.2% · darhol yoʻnaltirish</div></div>
+          <div class="card" style="display:flex;flex-direction:column;justify-content:center"><div class="stat-lbl">RAQOBATCHI</div><div style="font-family:var(--disp);font-weight:600;font-size:17px;color:var(--ink);line-height:1.2">Boʻsh kreslo</div><div class="note" style="margin-top:6px">Hech qachon skrindan oʻtmaganlar.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b class="dot">ZENO</b> · KOʻZNUR</span><span>MUAMMO</span></div>
+</section>
+
+<!-- ========== 3 · SOLUTION ========== -->
+<section class="slide light" data-ctx="light">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <div class="eyebrow"><span class="tick"></span><span class="ml lbl">YECHIM</span><span class="ml num">/ 03</span></div>
+    <h2 class="head" style="max-width:22ch">Bitta fundus suratidan toʻrt qarorli triaj chiqishi.</h2>
+    <div class="content" style="padding-top:24px">
+      <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:46px;align-items:center">
+        <div>
+          <p class="sub" style="margin-bottom:26px">KoʻzNur fundus rasmni qabul qiladi va sekundlarda toʻrt narsani qaytaradi. Bu — qaror-qoʻllab-quvvatlash; <b style="color:var(--ink)">yakuniy qarorni oftalmolog qabul qiladi</b>. U mavjud skrining tarmogʻini zamonaviylashtiradi, shifokorni almashtirmaydi.</p>
+          <div class="amberbox" style="margin-bottom:0">
+            <div class="at">QOIDA</div>
+            <div style="font-size:13.5px;color:var(--ink);line-height:1.5">Triaj, tashxis emas. Har bir chiqish yoʻnaltirish tavsiyasi bilan tugaydi — hech qachon yakuniy tashxis bilan emas.</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:13px">
+          <div class="card" style="display:flex;align-items:center;gap:16px;padding:16px 20px">
+            <div class="mono" style="font-size:30px;font-weight:600;color:var(--g2)">2</div>
+            <div><div class="ml" style="color:var(--muted)">ICDR DARAJA</div><div style="font-family:var(--disp);font-weight:500;font-size:15px;margin-top:3px">0 → 4 shkala (Moderate)</div></div>
+          </div>
+          <div class="card" style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-left:2px solid var(--amber)">
+            <div class="mono" style="font-size:18px;font-weight:600;color:var(--amber)">≥2</div>
+            <div><div class="ml" style="color:var(--amber)">REFERABLE</div><div style="font-family:var(--disp);font-weight:500;font-size:15px;margin-top:3px">Yoʻnaltirish kerak</div></div>
+          </div>
+          <div class="card" style="display:flex;align-items:center;gap:16px;padding:16px 20px">
+            <div class="mono" style="font-size:24px;font-weight:600;color:var(--teal-d)">0.87</div>
+            <div><div class="ml" style="color:var(--muted)">CONFIDENCE</div><div style="font-family:var(--disp);font-weight:500;font-size:15px;margin-top:3px">Ishonch darajasi</div></div>
+          </div>
+          <div class="card" style="display:flex;align-items:center;gap:16px;padding:16px 20px">
+            <div class="mono" style="font-size:18px;font-weight:600;color:var(--teal-d)">CAM</div>
+            <div><div class="ml" style="color:var(--muted)">GRAD-CAM</div><div style="font-family:var(--disp);font-weight:500;font-size:15px;margin-top:3px">Diqqat issiqlik xaritasi</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b class="dot">ZENO</b> · KOʻZNUR</span><span>YECHIM · TRIAJ</span></div>
+</section>
+
+<!-- ========== 4 · LIVE CONSOLE SCREENSHOT ========== -->
+<section class="slide dark" data-ctx="dark">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <span class="reticle r-tl"></span><span class="reticle r-tr"></span>
+    <div class="eyebrow" style="color:var(--teal)"><span class="tick"></span><span class="ml">JONLI KONSOL</span><span class="ml num" style="color:#6f8694">/ 04</span></div>
+    <h2 class="head" style="max-width:24ch">Aniqlik asbobiga oʻxshatib qurilgan instrument konsoli.</h2>
+    <div class="content" style="padding-top:18px">
+      <div style="display:grid;grid-template-columns:1.55fr .85fr;gap:38px;align-items:center">
+        <div class="mount">
+          <span class="m-tl"></span><span class="m-tr"></span><span class="m-bl"></span><span class="m-br"></span>
+          <span class="m-cap">KOʻZNUR · IDLE</span>
+          <img src="mvp-home.png" alt="KoʻzNur idle instrument console">
+        </div>
+        <div>
+          <p class="sub" style="margin-bottom:22px;color:#9fb2bd">React (Vite + Tailwind) konsoli: fundus rasmni mountga tortib tashlash, namuna toʻplami, natija kartasi va Grad-CAM almashtirgichi. Server holati va shkala doimo koʻrinadi.</p>
+          <ul class="clean" style="color:#cfe0e6">
+            <li style="color:#cfe0e6"><b style="color:#fff">Drag-and-drop mount</b><br><small>PNG · JPG · WEBP</small></li>
+            <li style="color:#cfe0e6"><b style="color:#fff">Namuna galereyasi</b> — demo har doim ishlaydi<br><small>Rang = kutilgan ICDR darajasi</small></li>
+            <li style="color:#cfe0e6"><b style="color:#fff">Doimiy eslatma</b><br><small>"Bu vosita tashxis emas, faqat skrining yordamchisi"</small></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b style="color:var(--teal-d)">ZENO</b> · KOʻZNUR</span><span>MVP · HOME</span></div>
+</section>
+
+<!-- ========== 5 · SYSTEM ARCHITECTURE ========== -->
+<section class="slide light" data-ctx="light">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <div class="eyebrow"><span class="tick"></span><span class="ml lbl">TIZIM ARXITEKTURASI</span><span class="ml num">/ 05</span></div>
+    <h2 class="head">React → FastAPI → PyTorch → Grad-CAM</h2>
+    <div class="content" style="padding-top:14px">
+      <div style="display:grid;grid-template-columns:1.42fr .78fr;gap:40px;align-items:center">
+        <!-- SVG FLOW -->
+        <svg viewBox="0 0 760 340" width="100%" style="overflow:visible" role="img" aria-label="System architecture flow">
+          <defs>
+            <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+              <path d="M0,0 L8,4.5 L0,9 Z" fill="#0F838C"/>
+            </marker>
+          </defs>
+          <!-- node A: client -->
+          <rect x="2" y="36" width="186" height="118" rx="5" fill="#FFFFFF" stroke="#D9E6EA"/>
+          <rect x="2" y="36" width="186" height="22" rx="5" fill="#0E1A24"/>
+          <text x="14" y="51" font-family="JetBrains Mono" font-size="10" letter-spacing="1.4" fill="#0FB5BA">CLIENT</text>
+          <text x="14" y="80" font-family="Space Grotesk" font-weight="600" font-size="15" fill="#0E1A24">React</text>
+          <text x="14" y="98" font-family="JetBrains Mono" font-size="9.5" fill="#5A6B7B">Vite + Tailwind</text>
+          <text x="14" y="118" font-family="Inter" font-size="10.5" fill="#5A6B7B">Mount · natija karta</text>
+          <text x="14" y="134" font-family="Inter" font-size="10.5" fill="#5A6B7B">Grad-CAM toggle</text>
+          <!-- arrow A->B -->
+          <line x1="190" y1="95" x2="246" y2="95" stroke="#0F838C" stroke-width="1.4" marker-end="url(#arr)"/>
+          <text x="218" y="86" text-anchor="middle" font-family="JetBrains Mono" font-size="8.5" fill="#5A6B7B">HTTP</text>
+          <!-- node B: API -->
+          <rect x="248" y="36" width="190" height="118" rx="5" fill="#FFFFFF" stroke="#D9E6EA"/>
+          <rect x="248" y="36" width="190" height="22" rx="5" fill="#0E1A24"/>
+          <text x="260" y="51" font-family="JetBrains Mono" font-size="10" letter-spacing="1.4" fill="#0FB5BA">API</text>
+          <text x="260" y="80" font-family="Space Grotesk" font-weight="600" font-size="15" fill="#0E1A24">FastAPI</text>
+          <text x="260" y="98" font-family="JetBrains Mono" font-size="9.5" fill="#5A6B7B">Python · uvicorn</text>
+          <text x="260" y="118" font-family="Inter" font-size="10.5" fill="#5A6B7B">Preprocessing (OpenCV)</text>
+          <text x="260" y="134" font-family="JetBrains Mono" font-size="9.5" fill="#0F838C">POST /predict</text>
+          <!-- arrow B->C -->
+          <line x1="440" y1="95" x2="496" y2="95" stroke="#0F838C" stroke-width="1.4" marker-end="url(#arr)"/>
+          <!-- node C: engine -->
+          <rect x="498" y="24" width="260" height="142" rx="5" fill="#0E1A24" stroke="#16242E"/>
+          <text x="512" y="42" font-family="JetBrains Mono" font-size="10" letter-spacing="1.4" fill="#0FB5BA">ENGINE · PyTorch (MPS)</text>
+          <text x="512" y="68" font-family="Space Grotesk" font-weight="600" font-size="15" fill="#FFFFFF">SE-ResNeXt50</text>
+          <text x="512" y="86" font-family="JetBrains Mono" font-size="9.5" fill="#9fb2bd">regression head</text>
+          <text x="512" y="108" font-family="Inter" font-size="10.5" fill="#cfe0e6">5-fold ansambl oʻrtachasi</text>
+          <text x="512" y="126" font-family="Inter" font-size="10.5" fill="#cfe0e6">threshold rounding → 0–4</text>
+          <rect x="512" y="138" width="120" height="18" rx="3" fill="rgba(15,181,186,.16)" stroke="rgba(15,181,186,.5)"/>
+          <text x="572" y="150" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#0FB5BA">Grad-CAM · last conv</text>
+          <!-- return arrow C->A -->
+          <path d="M628,166 L628,212 L96,212 L96,156" fill="none" stroke="#0F838C" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+          <text x="362" y="206" text-anchor="middle" font-family="JetBrains Mono" font-size="8.5" fill="#5A6B7B">JSON: grade · referable · confidence · gradcam_png</text>
+          <!-- caption -->
+          <text x="2" y="252" font-family="JetBrains Mono" font-size="9" letter-spacing="1.2" fill="#5A6B7B">SERVER-SIDE INFERENCE · NO IN-BROWSER MODEL · APPLE SILICON (MPS)</text>
+        </svg>
+        <!-- JSON contract -->
+        <div>
+          <div class="ml" style="color:var(--teal-d);margin-bottom:10px">/PREDICT — JSON KONTRAKTI</div>
+          <div class="json">
+<span class="c">// multipart image in →</span><br>
+{<br>
+&nbsp;&nbsp;<span class="k">"grade"</span>: <span class="n">2</span>,<br>
+&nbsp;&nbsp;<span class="k">"grade_label"</span>: <span class="s">"Moderate"</span>,<br>
+&nbsp;&nbsp;<span class="k">"referable"</span>: <span class="b">true</span>,<br>
+&nbsp;&nbsp;<span class="k">"confidence"</span>: <span class="n">0.87</span>,<br>
+&nbsp;&nbsp;<span class="k">"probabilities"</span>: [<span class="n">…</span>],<br>
+&nbsp;&nbsp;<span class="k">"gradcam_png_base64"</span>: <span class="s">"…"</span>,<br>
+&nbsp;&nbsp;<span class="k">"recommendation"</span>: <span class="s">"…"</span><br>
+}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b class="dot">ZENO</b> · KOʻZNUR</span><span>ARXITEKTURA</span></div>
+</section>
+
+<!-- ========== 6 · INFERENCE PIPELINE ========== -->
+<section class="slide light" data-ctx="light">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <div class="eyebrow"><span class="tick"></span><span class="ml lbl">INFERENS QUVURI</span><span class="ml num">/ 06</span></div>
+    <h2 class="head">Rasmdan darajagacha — olti qadam</h2>
+    <div class="content" style="padding-top:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 56px">
+        <div>
+          <div class="pstep"><div class="pn">01</div><div><div class="pttl">Ben-Graham crop</div><div class="pdesc">Scale-radius asosida retinani kesib olish — <span class="pcode">288 px</span></div></div></div>
+          <div class="pstep"><div class="pn">02</div><div><div class="pttl">Resize</div><div class="pdesc">Model kirishiga keltirish — <span class="pcode">256 px</span></div></div></div>
+          <div class="pstep"><div class="pn">03</div><div><div class="pttl">ImageNet normalize</div><div class="pdesc">Pretrained backbone uchun mean/std normallashtirish</div></div></div>
+        </div>
+        <div>
+          <div class="pstep"><div class="pn">04</div><div><div class="pttl">Regression</div><div class="pdesc">SE-ResNeXt50 regressiya boshi → uzluksiz qiymat · 5-fold ansambl oʻrtachasi</div></div></div>
+          <div class="pstep"><div class="pn">05</div><div><div class="pttl">Threshold rounding</div><div class="pdesc">Diskret darajaga → <span class="pcode">[0.5, 1.5, 2.5, 3.5]</span> chegaralari</div></div></div>
+          <div class="pstep"><div class="pn">06</div><div><div class="pttl">Grad-CAM</div><div class="pdesc">Oxirgi konvolyutsion blokda diqqat xaritasi → overlay</div></div></div>
+        </div>
+      </div>
+      <div style="margin-top:22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <span class="ml" style="color:var(--muted)">OQIM</span>
+        <span class="mono" style="font-size:12px;color:var(--ink)">288</span><span style="color:var(--teal-d)">→</span>
+        <span class="mono" style="font-size:12px;color:var(--ink)">256</span><span style="color:var(--teal-d)">→</span>
+        <span class="mono" style="font-size:12px;color:var(--ink)">normalize</span><span style="color:var(--teal-d)">→</span>
+        <span class="mono" style="font-size:12px;color:var(--ink)">regression</span><span style="color:var(--teal-d)">→</span>
+        <span class="mono" style="font-size:12px;color:var(--ink)">round</span><span style="color:var(--teal-d)">→</span>
+        <span class="mono" style="font-size:12px;color:var(--ink)">grade 0–4</span>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b class="dot">ZENO</b> · KOʻZNUR</span><span>PIPELINE</span></div>
+</section>
+
+<!-- ========== 7 · DATA ========== -->
+<section class="slide light" data-ctx="light">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <div class="eyebrow"><span class="tick"></span><span class="ml lbl">MAʼLUMOTLAR</span><span class="ml num">/ 07</span></div>
+    <h2 class="head" style="max-width:22ch">Ochiq, oftalmolog-baholangan fundus toʻplamlari.</h2>
+    <div class="content" style="padding-top:24px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:26px">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div><div class="stat-lbl">APTOS 2019</div><div class="stat-val" style="font-size:40px;color:var(--ink)">3,662</div></div>
+            <span class="tag teal">PRIMARY</span>
+          </div>
+          <div class="note" style="margin-top:12px">ICDR 0–4 belgilangan fundus tasvirlari. Fine-tune uchun yetarli darajada ixcham; tasvir sifati turlicha.</div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div><div class="stat-lbl">EYEPACS 2015</div><div class="stat-val" style="font-size:40px;color:var(--ink)">~88k</div></div>
+            <span class="tag">PRETRAIN / SCALE</span>
+          </div>
+          <div class="note" style="margin-top:12px">Eng katta ball-koʻtaruvchi: ushbu yirik toʻplamda oldindan oʻrgatish keyingi fine-tune aniqligini sezilarli oshiradi.</div>
+        </div>
+      </div>
+      <div class="hair" style="margin-bottom:18px"></div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+        <span class="ml" style="color:var(--muted)">ICDR SHKALA</span>
+        <span class="gchip"><span class="gdot" style="background:var(--g0)"></span>0 No DR</span>
+        <span class="gchip"><span class="gdot" style="background:var(--g1)"></span>1 Mild</span>
+        <span class="gchip"><span class="gdot" style="background:var(--g2)"></span>2 Moderate</span>
+        <span class="gchip"><span class="gdot" style="background:var(--g3)"></span>3 Severe</span>
+        <span class="gchip"><span class="gdot" style="background:var(--g4)"></span>4 Proliferative</span>
+        <span style="margin-left:auto" class="note">Litsenziya — ochiq tanlov maʼlumotlari, tadqiqot uchun.</span>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b class="dot">ZENO</b> · KOʻZNUR</span><span>DATA</span></div>
+</section>
+
+<!-- ========== 8 · HOW THE FIELD SOLVED IT ========== -->
+<section class="slide light" data-ctx="light">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <div class="eyebrow"><span class="tick"></span><span class="ml lbl">SOHA QANDAY HAL QILGAN</span><span class="ml num">/ 08</span></div>
+    <h2 class="head">Tasdiqlangan retsept — biz uni takrorlaymiz</h2>
+    <div class="content" style="padding-top:18px">
+      <div style="display:grid;grid-template-columns:.92fr 1.08fr;gap:46px;align-items:start">
+        <div>
+          <div class="card" style="margin-bottom:14px">
+            <div class="ml" style="color:var(--teal-d);margin-bottom:8px">GULSHAN ET AL. · JAMA 2016</div>
+            <p class="note" style="color:var(--ink);font-size:13px">Chuqur CNN (Inception-v3), <b>~128,000</b> baholangan fundus tasviri. Referable-DR <b>AUC ≈ 0.991</b>, sezgirlik/oʻziga xoslik ~90% / 98%.</p>
+          </div>
+          <div class="card">
+            <div class="ml" style="color:var(--teal-d);margin-bottom:8px">GOOGLE ARDA</div>
+            <p class="note" style="color:var(--ink);font-size:13px">Tailand va Hindiston klinikalarida <b>prospektiv validatsiya</b> qilingan productized variant.</p>
+          </div>
+          <p class="note" style="margin-top:14px">APTOS 2019 yetakchi yechimlari xususiy reytingda <b style="color:var(--ink)">QWK ≈ 0.93</b>.</p>
+        </div>
+        <div>
+          <div class="ml" style="color:var(--muted);margin-bottom:6px">APTOS-2019 GʻOLIB RICHAGLARI · TAʼSIR BOʻYICHA</div>
+          <div class="lever"><span class="lrank">1</span><div class="lname">2015 (EyePACS) pretraining<small>~88k tasvir — eng katta yagona ball richagi</small></div><div class="lbar"><span class="lfill" data-w="100%"></span></div></div>
+          <div class="lever"><span class="lrank">2</span><div class="lname">Regression head + threshold rounding<small>klassifikatsiya emas — tartibli darajalarga mos</small></div><div class="lbar"><span class="lfill" data-w="84%"></span></div></div>
+          <div class="lever"><span class="lrank">3</span><div class="lname">Model ansambllari<small>bir nechta foldlar oʻrtachasi</small></div><div class="lbar"><span class="lfill" data-w="72%"></span></div></div>
+          <div class="lever"><span class="lrank">4</span><div class="lname">Ben-Graham preprocessing<small>scale-radius crop + kontrast normallash</small></div><div class="lbar"><span class="lfill" data-w="64%"></span></div></div>
+          <div class="lever"><span class="lrank">5</span><div class="lname">Yuqori rezolyutsiya<small>256–456 px kirish</small></div><div class="lbar"><span class="lfill" data-w="54%"></span></div></div>
+          <div class="lever"><span class="lrank">6</span><div class="lname">Iterativ pseudo-labeling<small>belgilanmagan tasvirlardan qoʻshimcha signal</small></div><div class="lbar"><span class="lfill" data-w="46%"></span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b class="dot">ZENO</b> · KOʻZNUR</span><span>PRIOR ART</span></div>
+</section>
+
+<!-- ========== 9 · PERFORMANCE ========== -->
+<section class="slide light" data-ctx="light">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <div class="eyebrow"><span class="tick"></span><span class="ml lbl">SAMARADORLIK</span><span class="ml num">/ 09</span></div>
+    <h2 class="head">~0.92 QWK · referable sezgirlik ~0.92–0.95</h2>
+    <div class="content" style="padding-top:16px">
+      <div style="display:grid;grid-template-columns:.95fr 1.05fr;gap:44px;align-items:center">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="card"><div class="stat-lbl">QWK (5-FOLD CV)</div><div class="stat-val" style="font-size:38px;color:var(--g0)">~0.92</div><div class="note" style="margin-top:6px">Quadratic Weighted Kappa</div></div>
+          <div class="card"><div class="stat-lbl">REFERABLE SEZGIRLIK</div><div class="stat-val" style="font-size:38px;color:var(--teal-d)">~.92–.95</div><div class="note" style="margin-top:6px">grade ≥ 2 ni ushlash</div></div>
+          <div class="card"><div class="stat-lbl">NO-DR RECALL</div><div class="stat-val" style="font-size:38px;color:var(--g0)">~0.98</div><div class="note" style="margin-top:6px">sogʻlomni notoʻgʻri yoʻnaltirmaslik</div></div>
+          <div class="card"><div class="stat-lbl">SEVERE/PROLIF. RECALL</div><div class="stat-val" style="font-size:38px;color:var(--g3)">~.48–.59</div><div class="note" style="margin-top:6px">ogʻir darajalar qiyinroq — lekin referable</div></div>
+        </div>
+        <div>
+          <div class="ml" style="color:var(--muted);margin-bottom:14px">PER-GRADE RECALL (HELD-OUT)</div>
+          <div class="bchart">
+            <div class="brow"><span class="blbl">No DR</span><div class="btrack"><span class="bfill" data-w="98%" style="background:var(--g0)"></span></div><span class="bval">0.98</span></div>
+            <div class="brow"><span class="blbl">Referable ≥2</span><div class="btrack"><span class="bfill" data-w="93%" style="background:var(--teal-d)"></span></div><span class="bval">~0.93</span></div>
+            <div class="brow"><span class="blbl">Severe</span><div class="btrack"><span class="bfill" data-w="55%" style="background:var(--g3)"></span></div><span class="bval">~0.55</span></div>
+            <div class="brow"><span class="blbl">Proliferative</span><div class="btrack"><span class="bfill" data-w="48%" style="background:var(--g4)"></span></div><span class="bval">~0.48</span></div>
+          </div>
+          <div class="amberbox" style="margin-top:20px">
+            <div class="at">HALOL OGOHLANTIRISH</div>
+            <div style="font-size:12.5px;color:var(--ink);line-height:1.5">Held-out APTOS bo‘linmasida QWK 0.93 / referable sezgirlik 0.978 o‘lchangan — biroq bu bo‘linma <b>in-distribution</b>. Shuning uchun halol sarlavha sifatida ~0.92 QWK keltiramiz; prospektiv klinik validatsiya hali kerak.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b class="dot">ZENO</b> · KOʻZNUR</span><span>PERFORMANCE</span></div>
+</section>
+
+<!-- ========== 10 · GRAD-CAM RESULT SCREENSHOT ========== -->
+<section class="slide dark" data-ctx="dark">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <span class="reticle r-tl"></span><span class="reticle r-tr"></span>
+    <div class="eyebrow" style="color:var(--teal)"><span class="tick"></span><span class="ml">IZOHLANUVCHANLIK · GRAD-CAM</span><span class="ml num" style="color:#6f8694">/ 10</span></div>
+    <h2 class="head" style="max-width:26ch">Model nimaga qaraganini koʻrsatadi — qora quti emas.</h2>
+    <div class="content" style="padding-top:16px">
+      <div style="display:grid;grid-template-columns:1.5fr .9fr;gap:38px;align-items:center">
+        <div class="mount">
+          <span class="m-tl"></span><span class="m-tr"></span><span class="m-bl"></span><span class="m-br"></span>
+          <span class="m-cap">KOʻZNUR · RESULT · SEVERE</span>
+          <img src="mvp-result-severe.png" alt="KoʻzNur result with Grad-CAM heatmap, Severe grade, amber referable alert">
+        </div>
+        <div>
+          <p class="sub" style="margin-bottom:22px;color:#9fb2bd">Grad-CAM oxirgi konvolyutsion blok gradiyentlaridan issiqlik xaritasini hosil qiladi — qaysi hududlar darajaga turtki bo‘lganini ko‘rsatadi: gemorragiyalar, ekssudatlar, neovaskularizatsiya.</p>
+          <ul class="clean" style="color:#cfe0e6">
+            <li style="color:#cfe0e6"><b style="color:#fff">Daraja gauge</b> + amber referable signal</li>
+            <li style="color:#cfe0e6"><b style="color:#fff">Issiqlik overlay</b> oftalmologga tekshirish nuqtasini beradi</li>
+            <li style="color:#cfe0e6"><b style="color:#fff">Ishonchni oshiradi</b> — mutaxassis modelni tekshira oladi</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b style="color:var(--teal-d)">ZENO</b> · KOʻZNUR</span><span>GRAD-CAM</span></div>
+</section>
+
+<!-- ========== 11 · SEVERE-CASE FIX ========== -->
+<section class="slide light" data-ctx="light">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <div class="eyebrow"><span class="tick"></span><span class="ml lbl">XAVFSIZLIK TUZATISHI</span><span class="ml num">/ 11</span></div>
+    <h2 class="head" style="max-width:24ch">Proliferativ holatlar endi referable deb belgilanadi.</h2>
+    <div class="content" style="padding-top:24px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch">
+        <div class="card" style="border-left:2px solid var(--g4)">
+          <div class="ml" style="color:var(--muted);margin-bottom:10px">OLDINGI PROTOTIP</div>
+          <div style="font-family:var(--disp);font-weight:600;font-size:20px;color:var(--ink);margin-bottom:10px">Xavfli kam baholash</div>
+          <p class="note" style="font-size:13px">Proliferativ (eng ogʻir) holatlarni baʼzan <b style="color:var(--g4)">"No DR"</b> deb baholar edi — bemorni butunlay yoʻnaltirmasdan qoldirardi. Triajda eng xavfli xato.</p>
+          <div style="margin-top:16px;display:flex;align-items:center;gap:10px">
+            <span class="mono" style="font-size:13px;color:var(--g4)">4 Proliferative</span>
+            <span style="color:var(--muted)">→</span>
+            <span class="mono" style="font-size:13px;color:var(--muted)">0 No DR ✗</span>
+          </div>
+        </div>
+        <div class="card" style="border-left:2px solid var(--amber)">
+          <div class="ml" style="color:var(--amber);margin-bottom:10px">JORIY MOTOR</div>
+          <div style="font-family:var(--disp);font-weight:600;font-size:20px;color:var(--ink);margin-bottom:10px">Doim referable belgilanadi</div>
+          <p class="note" style="font-size:13px">Severe/Proliferative holatlar per-grade aniqligi haligacha qiyin (~0.48–0.59), <b style="color:var(--ink)">lekin doimo toʻgʻri referable</b> deb belgilanadi — triajning eng muhim talabi bajariladi.</p>
+          <div style="margin-top:16px;display:flex;align-items:center;gap:10px">
+            <span class="mono" style="font-size:13px;color:var(--g4)">4 Proliferative</span>
+            <span style="color:var(--muted)">→</span>
+            <span class="mono" style="font-size:13px;color:var(--amber)">≥2 REFERABLE ✓</span>
+          </div>
+        </div>
+      </div>
+      <p class="note" style="margin-top:18px;text-align:center">Triajda muvaffaqiyat oʻlchovi — aniq daraja emas, balki <b style="color:var(--ink)">hech bir ogʻir holatni oʻtkazib yubormaslik</b>.</p>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b class="dot">ZENO</b> · KOʻZNUR</span><span>SAFETY</span></div>
+</section>
+
+<!-- ========== 12 · LIMITATIONS ========== -->
+<section class="slide light" data-ctx="light">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <div class="eyebrow"><span class="tick"></span><span class="ml lbl">CHEKLOVLAR · HALOLLIK</span><span class="ml num">/ 12</span></div>
+    <h2 class="head">Nimani hali daʼvo qilmaymiz</h2>
+    <div class="content" style="padding-top:22px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px 40px">
+        <div class="card"><div class="ml" style="color:var(--teal-d);margin-bottom:8px">TASVIR SIFATI</div><p class="note" style="color:var(--ink);font-size:13px">Natija kirish sifatiga bogʻliq — xira, yorugʻlik yetishmagan yoki noto‘g‘ri kadrlangan tasvir baholashni buzadi.</p></div>
+        <div class="card"><div class="ml" style="color:var(--teal-d);margin-bottom:8px">OGʻIR DARAJALAR QIYIN</div><p class="note" style="color:var(--ink);font-size:13px">Severe/Proliferative aniq daraja aniqligi past (~0.48–0.59); biz ularni referable bilan qoplaymiz, lekin daraja-aniqligini emas.</p></div>
+        <div class="card"><div class="ml" style="color:var(--teal-d);margin-bottom:8px">PROSPEKTIV VALIDATSIYA KERAK</div><p class="note" style="color:var(--ink);font-size:13px">Hozirgi raqamlar in-distribution boʻlinmada. Mahalliy klinik (prospektiv) validatsiya hali oʻtkazilishi shart.</p></div>
+        <div class="card"><div class="ml" style="color:var(--teal-d);margin-bottom:8px">MAʼLUMOT MAXFIYLIGI</div><p class="note" style="color:var(--ink);font-size:13px">Tibbiy tasvirlar — anonimlashtirish, xavfsiz saqlash va ruxsat boshqaruvi pilot bosqichida talab qilinadi.</p></div>
+      </div>
+      <div class="amberbox" style="margin-top:20px">
+        <div class="at">DOIMIY RAMKA</div>
+        <div style="font-size:13px;color:var(--ink)">Triaj / qaror-qoʻllab-quvvatlash — tashxis emas. Yakuniy qarorni har doim oftalmolog qabul qiladi.</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b class="dot">ZENO</b> · KOʻZNUR</span><span>LIMITATIONS</span></div>
+</section>
+
+<!-- ========== 13 · ROADMAP ========== -->
+<section class="slide light" data-ctx="light">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <div class="eyebrow"><span class="tick"></span><span class="ml lbl">YOʻL XARITASI</span><span class="ml num">/ 13</span></div>
+    <h2 class="head">MVP dan milliy tarmoqqa</h2>
+    <div class="content" style="padding-top:24px">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px">
+        <div class="card">
+          <div class="mono" style="font-size:12px;color:var(--teal-d);font-weight:600">01</div>
+          <div style="font-family:var(--disp);font-weight:600;font-size:16px;margin:8px 0;color:var(--ink)">Toʻliq fine-tune</div>
+          <p class="note" style="font-size:12px">APTOS + EyePACS bo‘yicha to‘liq fine-tune — o‘z og‘irliklarimiz va metrics.json.</p>
+        </div>
+        <div class="card">
+          <div class="mono" style="font-size:12px;color:var(--teal-d);font-weight:600">02</div>
+          <div style="font-family:var(--disp);font-weight:600;font-size:16px;margin:8px 0;color:var(--ink)">Klinik validatsiya</div>
+          <p class="note" style="font-size:12px">Mahalliy prospektiv validatsiya — 500–1,000 anonim, oftalmolog-baholangan tasvir.</p>
+        </div>
+        <div class="card">
+          <div class="mono" style="font-size:12px;color:var(--teal-d);font-weight:600">03</div>
+          <div style="font-family:var(--disp);font-weight:600;font-size:16px;margin:8px 0;color:var(--ink)">Tarmoqqa integratsiya</div>
+          <p class="note" style="font-size:12px">Mavjud milliy skrining tarmog‘iga ulanish — 1 mintaqa / 3–6 sayt pilot.</p>
+        </div>
+        <div class="card" style="border-left:2px solid var(--teal-d)">
+          <div class="mono" style="font-size:12px;color:var(--teal-d);font-weight:600">04</div>
+          <div style="font-family:var(--disp);font-weight:600;font-size:16px;margin:8px 0;color:var(--ink)">Yangi modullar</div>
+          <p class="note" style="font-size:12px">Glaukoma, AMD, gipertenziv retinopatiya — 10× platforma kengayishi.</p>
+        </div>
+      </div>
+      <div class="hair" style="margin:24px 0 16px"></div>
+      <div style="display:flex;gap:30px;flex-wrap:wrap">
+        <div><div class="ml" style="color:var(--muted);margin-bottom:5px">PILOT QUVVATI</div><div class="mono" style="font-size:15px;color:var(--ink)">30k–60k <span style="color:var(--muted);font-size:11px">skrining/yil</span></div></div>
+        <div><div class="ml" style="color:var(--muted);margin-bottom:5px">SOFTWARE TAM</div><div class="mono" style="font-size:15px;color:var(--ink)">6–18 mlrd <span style="color:var(--muted);font-size:11px">UZS/yil</span></div></div>
+        <div><div class="ml" style="color:var(--muted);margin-bottom:5px">SKRINING TARIFI</div><div class="mono" style="font-size:15px;color:var(--ink)">8–12k <span style="color:var(--muted);font-size:11px">UZS · B2G/B2B</span></div></div>
+        <div><div class="ml" style="color:var(--muted);margin-bottom:5px">SOʻROV</div><div class="mono" style="font-size:15px;color:var(--ink)">150–300M <span style="color:var(--muted);font-size:11px">UZS pilot</span></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b class="dot">ZENO</b> · KOʻZNUR</span><span>ROADMAP</span></div>
+</section>
+
+<!-- ========== 14 · MARKET / COMPETITION ========== -->
+<section class="slide light" data-ctx="light">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <div class="eyebrow"><span class="tick"></span><span class="ml lbl">BOZOR · RAQOBAT</span><span class="ml num">/ 14</span></div>
+    <h2 class="head">Kamerani emas, oʻtkazuvchanlikni monetizatsiya qilamiz</h2>
+    <div class="content" style="padding-top:22px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start">
+        <div>
+          <div class="ml" style="color:var(--muted);margin-bottom:12px">RAQOBAT VA NEGA BIZ</div>
+          <div class="lever" style="grid-template-columns:1fr"><div class="lname">Qoʻlda oftalmolog baholash<small>masshtablanmaydi — mutaxassis vaqti tiqilinch</small></div></div>
+          <div class="lever" style="grid-template-columns:1fr"><div class="lname">Xorijiy Ai<small>narx · lokalizatsiya · prokyurment ishqalanishi</small></div></div>
+          <div class="lever" style="grid-template-columns:1fr"><div class="lname">Faqat-kamera skrining<small>baholash tiqilinchi saqlanib qoladi</small></div></div>
+          <p class="note" style="margin-top:16px">Oftalmoskop e’tirozi: u DR’ni sekundlarda topadi — lekin faqat <b style="color:var(--ink)">oftalmolog uchun</b> (kam resurs). Dunyo DR’ni fundus <b style="color:var(--ink)">fotografiyasi</b> bilan skrin qiladi; mutaxassis bo‘lmagan to‘g‘ridan-to‘g‘ri oftalmoskopiya ~50% sezgirlikka ega.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="card"><div class="stat-lbl">TAM (SKRINING)</div><div class="stat-val" style="font-size:30px;color:var(--ink)">.75–1.5M</div><div class="note" style="margin-top:6px">skrining/yil</div></div>
+          <div class="card"><div class="stat-lbl">SOFTWARE TAM</div><div class="stat-val" style="font-size:30px;color:var(--ink)">6–18B</div><div class="note" style="margin-top:6px">UZS/yil</div></div>
+          <div class="card"><div class="stat-lbl">KONSERVATIV SHIFT</div><div class="stat-val" style="font-size:30px;color:var(--teal-d)">~$0.5M+</div><div class="note" style="margin-top:6px">yillik tom</div></div>
+          <div class="card"><div class="stat-lbl">MILLIY SSENARIY</div><div class="stat-val" style="font-size:30px;color:var(--teal-d)">~$1.5M</div><div class="note" style="margin-top:6px">yuqori variant</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b class="dot">ZENO</b> · KOʻZNUR</span><span>MARKET</span></div>
+</section>
+
+<!-- ========== 15 · CLOSING ========== -->
+<section class="slide dark" data-ctx="dark">
+  <div class="stage">
+    <div class="grid-bg"></div>
+    <span class="reticle r-tl"></span><span class="reticle r-tr"></span><span class="reticle r-bl"></span><span class="reticle r-br"></span>
+    <div class="content" style="justify-content:center">
+      <div class="eyebrow" style="color:var(--teal)"><span class="tick"></span><span class="ml">SOʻROV</span><span class="ml num" style="color:#6f8694">/ 15</span></div>
+      <h1 class="title" style="font-size:clamp(32px,5vw,64px);color:#fff;max-width:20ch;margin-bottom:24px">Bitta klinik hamkor sayt. Validatsiya tasvirlari. Pilot.</h1>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:34px">
+        <div class="card" style="min-width:180px"><div class="stat-lbl" style="color:var(--teal)">HAMKOR</div><div class="mono" style="font-size:20px;color:#fff;margin-top:6px">1 klinik sayt</div></div>
+        <div class="card" style="min-width:180px"><div class="stat-lbl" style="color:var(--teal)">VALIDATSIYA</div><div class="mono" style="font-size:20px;color:#fff;margin-top:6px">500–1,000 tasvir</div></div>
+        <div class="card" style="min-width:180px"><div class="stat-lbl" style="color:var(--teal)">PILOT BUDJET</div><div class="mono" style="font-size:20px;color:#fff;margin-top:6px">150–300M UZS</div></div>
+      </div>
+      <div class="hair" style="max-width:560px;margin-bottom:22px"></div>
+      <p class="sub" style="color:#9fb2bd;max-width:60ch">Raqobatchi — boʻsh kreslo: mutaxassis kamligi sababli umuman skrindan oʻtmaydigan diabet bemorlari. KoʻzNur oftalmologni voronkaning <b style="color:#fff">boshidan</b> olib tashlaydi; ular faqat referable ~20–30% ni koʻradi.</p>
+      <div style="display:flex;align-items:center;gap:16px;margin-top:36px">
+        <div class="brand-reticle" style="width:34px;height:34px"><span class="ring"></span><span class="ring2" style="inset:9px"></span><span class="cx"></span><span class="cy"></span><span class="core" style="inset:14px"></span></div>
+        <div><div style="font-family:var(--disp);font-weight:600;font-size:18px;color:#fff">KoʻzNur</div><div class="ml" style="color:var(--teal)">TEAM ZENO · GULISTON 2026</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TEAM <b style="color:var(--teal-d)">ZENO</b> · KOʻZNUR</span><span>RAHMAT · SAVOLLAR</span></div>
+</section>
+
+</div>
+
+<div class="help">← → NAVIGATSIYA · F FULLSCREEN</div>
+
+<script>
+(function(){
+  var slides=Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var i=0, n=slides.length, body=document.body;
+  var counter=document.getElementById('counter'), prog=document.getElementById('progress');
+  function pad(x){return (x<10?'0':'')+x;}
+  function fireAnims(s){
+    s.querySelectorAll('.lfill').forEach(function(el){el.style.width=el.dataset.w;});
+    s.querySelectorAll('.bfill').forEach(function(el){el.style.width=el.dataset.w;});
+  }
+  function show(idx){
+    if(idx<0)idx=0; if(idx>n-1)idx=n-1;
+    slides[i].classList.remove('active');
+    i=idx;
+    var s=slides[i];
+    s.classList.add('active');
+    // reset bars so they replay
+    s.querySelectorAll('.lfill,.bfill').forEach(function(el){el.style.width='0';});
+    body.className=(s.dataset.ctx==='dark')?'dark-ctx':'light-ctx';
+    counter.textContent=pad(i+1)+' / '+pad(n);
+    prog.style.width=((i)/(n-1)*100)+'%';
+    requestAnimationFrame(function(){requestAnimationFrame(function(){fireAnims(s);});});
+  }
+  function next(){show(i+1);} function prev(){show(i-1);}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();next();}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}
+    else if(e.key==='Home'){show(0);} else if(e.key==='End'){show(n-1);}
+    else if(e.key==='f'||e.key==='F'){
+      if(!document.fullscreenElement){(document.documentElement.requestFullscreen||function(){})();}
+      else{(document.exitFullscreen||function(){})();}
+    }
+  });
+  // click navigation (right half = next, left = prev)
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.tagName==='A')return;
+    var x=e.clientX/window.innerWidth;
+    if(x>0.62)next(); else if(x<0.18)prev();
+  });
+  show(0);
+})();
+</script>
+</body>
+</html>

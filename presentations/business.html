@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KoʻzNur — Biznes taqdimoti — Zeno — Guliston 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --shell:#0E1A24;
+    --shell-2:#16242E;
+    --paper:#F6F8F9;
+    --ink:#0E1A24;
+    --muted:#5A6B7B;
+    --hair:#D9E6EA;
+    --teal:#0FB5BA;
+    --teal-dark:#0F838C;
+    --amber:#E8833A;
+    --white:#FFFFFF;
+    --g0:#1F9D74;
+    --g1:#7FB23A;
+    --g2:#E0A82E;
+    --g3:#DB7C26;
+    --g4:#C0392B;
+    --grid-light: rgba(14,26,36,0.05);
+    --grid-dark: rgba(255,255,255,0.045);
+    --pad: clamp(36px, 4.6vw, 84px);
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{ margin:0; height:100%; }
+
+  body{
+    color:var(--ink);
+    background:var(--shell);
+    font-family:"Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- Mono / display tokens ---------- */
+  .mono{ font-family:"JetBrains Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+  h1,h2,h3,.display{ font-family:"Space Grotesk", sans-serif; margin:0; font-weight:600; }
+
+  .micro{
+    font-family:"JetBrains Mono", monospace;
+    text-transform:uppercase;
+    letter-spacing:0.14em;
+    font-size:clamp(10px, 0.82vw, 12.5px);
+    font-weight:600;
+    color:var(--teal-dark);
+  }
+
+  h1{ font-size:clamp(46px, 6.4vw, 96px); line-height:0.96; letter-spacing:-0.015em; }
+  h2{ font-size:clamp(30px, 3.6vw, 56px); line-height:1.02; letter-spacing:-0.012em; max-width:18ch; }
+  h3{ font-size:clamp(16px, 1.45vw, 22px); line-height:1.15; letter-spacing:-0.005em; }
+  p{ margin:0; font-size:clamp(14px, 1.12vw, 18px); line-height:1.5; color:var(--muted); }
+
+  /* ---------- Deck / slides ---------- */
+  .deck{ width:100vw; height:100vh; position:relative; }
+
+  .slide{
+    position:absolute; inset:0;
+    width:100vw; height:100vh;
+    padding:var(--pad);
+    display:none;
+    grid-template-rows:auto 1fr auto;
+    overflow:hidden;
+  }
+  .slide.active{ display:grid; }
+  .slide.active .anim{ animation:settle 460ms cubic-bezier(.16,.84,.36,1) both; }
+  @keyframes settle{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
+
+  /* staged reveal */
+  .slide.active .stagger > *{ animation:rise 520ms cubic-bezier(.16,.84,.36,1) both; }
+  .slide.active .stagger > *:nth-child(1){ animation-delay:.05s; }
+  .slide.active .stagger > *:nth-child(2){ animation-delay:.12s; }
+  .slide.active .stagger > *:nth-child(3){ animation-delay:.19s; }
+  .slide.active .stagger > *:nth-child(4){ animation-delay:.26s; }
+  .slide.active .stagger > *:nth-child(5){ animation-delay:.33s; }
+  @keyframes rise{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:none; } }
+
+  /* light content surface */
+  .light{ background:var(--paper); color:var(--ink);
+    background-image:
+      linear-gradient(var(--grid-light) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-light) 1px, transparent 1px);
+    background-size:40px 40px, 40px 40px;
+  }
+  /* dark shell surface */
+  .dark{ background:var(--shell); color:var(--white);
+    background-image:
+      radial-gradient(circle at 88% 12%, rgba(15,181,186,0.10), transparent 42%),
+      linear-gradient(var(--grid-dark) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-dark) 1px, transparent 1px);
+    background-size:auto, 46px 46px, 46px 46px;
+  }
+  .dark p, .dark .lab{ color:rgba(255,255,255,0.72); }
+  .dark .micro{ color:var(--teal); }
+
+  /* corner reticle ticks on every slide */
+  .slide::before, .slide::after{
+    content:""; position:absolute; width:18px; height:18px; pointer-events:none; opacity:.5;
+  }
+  .slide::before{ left:calc(var(--pad) - 14px); top:calc(var(--pad) - 14px); border-left:1.5px solid var(--teal-dark); border-top:1.5px solid var(--teal-dark); }
+  .slide::after{ right:calc(var(--pad) - 14px); bottom:calc(var(--pad) - 22px); border-right:1.5px solid var(--teal-dark); border-bottom:1.5px solid var(--teal-dark); }
+  .dark.slide::before, .dark.slide::after{ opacity:.4; border-color:var(--teal); }
+
+  /* ---------- header band ---------- */
+  .head{ display:flex; align-items:baseline; gap:18px; }
+  .head .ttl{ display:grid; gap:10px; }
+  .rule{ height:1px; background:var(--hair); margin:18px 0; }
+  .dark .rule{ background:rgba(255,255,255,0.14); }
+
+  /* ---------- footer band ---------- */
+  .foot{ display:flex; justify-content:space-between; align-items:center; gap:16px; position:relative; z-index:3; }
+  .foot .micro{ color:var(--muted); }
+  .dark .foot .micro{ color:rgba(255,255,255,0.5); }
+  .src{ font-family:"JetBrains Mono", monospace; font-size:clamp(10px,0.78vw,12px); line-height:1.4; color:#7E909C; max-width:96ch; }
+  .dark .src{ color:rgba(255,255,255,0.45); }
+
+  /* ---------- brand mark ---------- */
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .reticle{ width:42px; height:42px; flex:none; }
+  .brandname{ font-family:"Space Grotesk"; font-weight:700; font-size:clamp(20px,1.9vw,28px); letter-spacing:-0.01em; }
+
+  /* ---------- generic layout ---------- */
+  .body{ align-self:center; }
+  .g2{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:clamp(26px,3.4vw,56px); align-items:center; }
+  .g3{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(14px,1.5vw,22px); }
+  .g4{ display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(12px,1.2vw,18px); }
+  .stack{ display:grid; gap:clamp(14px,1.6vw,22px); align-content:center; }
+
+  /* ---------- cards ---------- */
+  .card{ background:var(--white); border:1px solid var(--hair); border-radius:6px; padding:clamp(18px,1.9vw,28px); position:relative; }
+  .card.tick::before{ content:""; position:absolute; left:14px; top:14px; width:9px; height:9px; border-left:1.5px solid var(--teal); border-top:1.5px solid var(--teal); opacity:.7; }
+  .dark .card{ background:var(--shell-2); border-color:rgba(255,255,255,0.10); }
+
+  .metric{ display:grid; gap:8px; align-content:start; }
+  .num{ font-family:"JetBrains Mono"; font-variant-numeric:tabular-nums; font-weight:700; font-size:clamp(34px,4.4vw,64px); line-height:0.92; letter-spacing:-0.02em; color:var(--ink); }
+  .dark .num, .band .num{ color:var(--white); }
+  .lab{ font-size:clamp(13px,1.02vw,15.5px); line-height:1.32; color:var(--muted); }
+  .kicker{ font-family:"JetBrains Mono"; font-size:clamp(10px,0.8vw,12px); letter-spacing:0.1em; text-transform:uppercase; color:var(--teal-dark); }
+
+  .band{ background:var(--shell); color:var(--white); border-radius:6px; padding:clamp(20px,2.4vw,34px); border:1px solid rgba(14,26,36,0.5); position:relative; overflow:hidden; }
+  .band::after{ content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:linear-gradient(90deg, var(--grid-dark) 1px, transparent 1px); background-size:46px 100%; opacity:.6; }
+  .band p, .band .lab{ color:rgba(255,255,255,0.74); position:relative; z-index:1; }
+  .band .num{ position:relative; z-index:1; }
+  .band strong{ color:var(--white); }
+
+  .pill{ display:inline-flex; width:fit-content; align-items:center; gap:8px;
+    font-family:"JetBrains Mono"; font-size:clamp(10px,0.82vw,12.5px); font-weight:600; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--teal-dark); background:rgba(15,181,186,0.10); border:1px solid rgba(15,131,140,0.34); border-radius:999px; padding:6px 12px; }
+  .pill.amber{ color:var(--amber); background:rgba(232,131,58,0.10); border-color:rgba(232,131,58,0.40); }
+
+  .accent{ color:var(--teal-dark); }
+  .amber-tx{ color:var(--amber); }
+  .lead{ font-size:clamp(20px,2.2vw,34px); line-height:1.08; color:var(--ink); font-family:"Space Grotesk"; font-weight:500; letter-spacing:-0.01em; max-width:20ch; }
+  .dark .lead{ color:var(--white); }
+
+  ul.clean{ margin:0; padding:0; list-style:none; display:grid; gap:9px; }
+  ul.clean li{ position:relative; padding-left:18px; font-size:clamp(13px,1.05vw,16px); line-height:1.4; color:var(--muted); }
+  ul.clean li::before{ content:""; position:absolute; left:0; top:0.62em; width:7px; height:1.5px; background:var(--teal-dark); }
+
+  /* ---------- device mount (screenshots) ---------- */
+  .mount{ position:relative; background:var(--shell); border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:12px; box-shadow:0 30px 70px rgba(14,26,36,0.30); }
+  .mount .bar{ display:flex; align-items:center; justify-content:space-between; padding:0 4px 10px; }
+  .mount .dots{ display:flex; gap:6px; }
+  .mount .dots i{ width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.18); display:inline-block; }
+  .mount .cap{ font-family:"JetBrains Mono"; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.5); }
+  .screen{ position:relative; border-radius:5px; overflow:hidden; }
+  .screen img{ display:block; width:100%; height:100%; object-fit:cover; }
+  .screen::before, .screen::after{ content:""; position:absolute; width:16px; height:16px; z-index:2; pointer-events:none; }
+  .screen::before{ left:8px; top:8px; border-left:1.5px solid var(--teal); border-top:1.5px solid var(--teal); }
+  .screen::after{ right:8px; bottom:8px; border-right:1.5px solid var(--teal); border-bottom:1.5px solid var(--teal); }
+
+  /* ---------- pipeline flow ---------- */
+  .flow{ display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+  .step{ background:var(--white); border:1px solid var(--hair); border-radius:6px; padding:clamp(14px,1.5vw,20px); position:relative; display:grid; gap:8px; align-content:start; }
+  .step .sn{ font-family:"JetBrains Mono"; font-size:11px; color:var(--teal-dark); letter-spacing:0.1em; }
+  .step::after{ content:"›"; position:absolute; right:-11px; top:50%; transform:translateY(-50%); color:var(--teal-dark); font-weight:700; font-size:20px; z-index:2; }
+  .step:last-child::after{ content:""; }
+
+  /* ---------- table ---------- */
+  .table{ border:1px solid var(--hair); border-radius:6px; overflow:hidden; background:var(--white); }
+  .trow{ display:grid; grid-template-columns:1.1fr 1fr 1.25fr 1.35fr; border-bottom:1px solid var(--hair); }
+  .trow:last-child{ border-bottom:0; }
+  .tc{ padding:clamp(11px,1.15vw,17px); border-right:1px solid var(--hair); font-size:clamp(12px,0.98vw,15px); line-height:1.32; color:var(--muted); }
+  .tc:last-child{ border-right:0; }
+  .thead .tc{ background:var(--shell); color:var(--white); font-family:"JetBrains Mono"; font-size:clamp(10px,0.82vw,12.5px); letter-spacing:0.08em; text-transform:uppercase; }
+  .tc strong{ color:var(--ink); font-weight:600; }
+  .ok{ color:var(--g0); font-weight:600; }
+
+  /* ---------- timeline ---------- */
+  .timeline{ display:grid; grid-template-columns:repeat(4,1fr); border:1px solid var(--hair); border-radius:6px; overflow:hidden; background:var(--white); }
+  .phase{ padding:clamp(16px,1.9vw,28px); border-right:1px solid var(--hair); display:grid; gap:12px; align-content:start; position:relative; }
+  .phase:last-child{ border-right:0; }
+  .phase .ph-rule{ height:3px; background:var(--hair); border-radius:2px; overflow:hidden; }
+  .phase .ph-fill{ height:100%; background:linear-gradient(90deg,var(--teal),var(--teal-dark)); width:0; }
+  .slide.active .phase .ph-fill{ animation:fillbar 900ms cubic-bezier(.2,.7,.3,1) forwards; }
+  .phase:nth-child(1) .ph-fill{ animation-delay:.15s; --w:100%; }
+  .phase:nth-child(2) .ph-fill{ animation-delay:.30s; --w:100%; }
+  .phase:nth-child(3) .ph-fill{ animation-delay:.45s; --w:100%; }
+  .phase:nth-child(4) .ph-fill{ animation-delay:.60s; --w:100%; }
+  @keyframes fillbar{ to{ width:100%; } }
+
+  /* ---------- bars (financial) ---------- */
+  .bars{ display:grid; gap:16px; }
+  .bar{ display:grid; grid-template-columns:160px 1fr 96px; gap:16px; align-items:center; }
+  .bar .bl{ font-size:clamp(12px,0.98vw,15px); color:var(--ink); font-weight:500; }
+  .bar .bv{ font-family:"JetBrains Mono"; font-size:clamp(11px,0.9vw,13.5px); color:var(--teal-dark); text-align:right; letter-spacing:0.02em; }
+  .btrack{ height:14px; border-radius:999px; background:#E4EDEF; overflow:hidden; }
+  .bfill{ height:100%; border-radius:999px; background:linear-gradient(90deg,var(--teal),var(--teal-dark)); width:0; }
+  .slide.active .bfill{ animation:grow 1000ms cubic-bezier(.2,.7,.3,1) forwards; }
+  @keyframes grow{ to{ width:var(--w); } }
+
+  /* ---------- gauge / grade ramp (problem slide) ---------- */
+  .ramp{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; height:12px; }
+  .ramp span{ border-radius:3px; }
+
+  /* ---------- title slide bits ---------- */
+  .title-grid{ grid-template-rows:auto 1fr auto; }
+  .hero{ align-self:center; display:grid; gap:clamp(20px,2.4vw,30px); max-width:min(66vw,1000px); }
+  .hero .sub{ font-size:clamp(17px,1.5vw,24px); color:rgba(255,255,255,0.8); max-width:46ch; line-height:1.42; }
+
+  .stat-strip{ display:flex; gap:clamp(28px,3.4vw,60px); flex-wrap:wrap; }
+  .stat-strip .s .num{ font-size:clamp(22px,2.2vw,32px); }
+  .stat-strip .s .lab{ color:rgba(255,255,255,0.55); font-family:"JetBrains Mono"; font-size:11px; letter-spacing:0.06em; }
+
+  /* ---------- chrome ---------- */
+  .counter{ position:fixed; right:var(--pad); bottom:calc(var(--pad) - 18px); z-index:30;
+    font-family:"JetBrains Mono"; font-size:clamp(11px,0.9vw,13px); letter-spacing:0.1em; color:#90A2AC; }
+  .slide.dark ~ .counter{ }
+  .progress{ position:fixed; left:0; top:0; height:3px; background:linear-gradient(90deg,var(--teal),var(--teal-dark)); z-index:40; width:0; transition:width 240ms ease; }
+  .nav{ position:fixed; right:16px; top:16px; z-index:35; display:flex; gap:7px; opacity:0.16; transition:opacity .16s; }
+  .nav:hover{ opacity:1; }
+  .nav button{ width:34px; height:34px; border-radius:6px; border:1px solid rgba(14,26,36,0.18); background:rgba(255,255,255,0.9); color:var(--ink); font-family:"JetBrains Mono"; font-weight:700; cursor:pointer; }
+
+  @media (prefers-reduced-motion: reduce){
+    .slide.active .anim, .slide.active .stagger > *{ animation:none !important; }
+    .bfill, .phase .ph-fill{ animation:none !important; }
+    .bfill{ width:var(--w) !important; }
+    .phase .ph-fill{ width:100% !important; }
+    .progress{ transition:none; }
+  }
+
+  @media print{
+    @page{ size:16in 9in; margin:0; }
+    *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+    body{ overflow:visible; }
+    .nav,.progress,.counter{ display:none !important; }
+    .deck{ height:auto; }
+    .slide{ display:grid !important; position:relative !important; width:100vw !important; height:100vh !important; page-break-after:always; break-after:page; }
+    .slide.active .anim, .slide.active .stagger > *{ animation:none !important; }
+    .bfill{ width:var(--w) !important; animation:none !important; }
+    .phase .ph-fill{ width:100% !important; animation:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="nav" aria-label="Navigatsiya">
+  <button id="prev" aria-label="Oldingi">‹</button>
+  <button id="next" aria-label="Keyingi">›</button>
+</div>
+<div class="counter mono"><span id="cur">01</span> / <span id="tot">12</span></div>
+
+<main class="deck">
+
+  <!-- 01 — TITLE -->
+  <section class="slide dark title-grid active">
+    <div class="head anim">
+      <div class="brand">
+        <svg class="reticle" viewBox="0 0 42 42" fill="none" aria-hidden="true">
+          <circle cx="21" cy="21" r="19.5" stroke="#0FB5BA" stroke-width="1.2" opacity="0.5"/>
+          <circle cx="21" cy="21" r="12" stroke="#0FB5BA" stroke-width="1.4"/>
+          <circle cx="21" cy="21" r="4" fill="#0FB5BA"/>
+          <path d="M21 1.5V9M21 33v7.5M1.5 21H9M33 21h7.5" stroke="#0FB5BA" stroke-width="1.2"/>
+        </svg>
+        <span class="brandname">KoʻzNur</span>
+      </div>
+    </div>
+    <div class="hero anim">
+      <div class="micro">Biznes taqdimoti · Zeno · Umummilliy AI Hakaton · Guliston 2026</div>
+      <h1>Diabetik koʻrlikni oldini olishni milliy miqyosga olib chiqamiz.</h1>
+      <p class="sub">AI triage: bitta fundus suratidan soniyalarda riskni baholaydi va shifokorga faqat kerakli bemorni yoʻnaltiradi. Tashxis emas — qaror yordamchisi.</p>
+      <div class="stat-strip mono">
+        <div class="s metric"><div class="num">1.5M</div><div class="lab">Diabet bemori</div></div>
+        <div class="s metric"><div class="num">~0.92</div><div class="lab">QWK kelishuv</div></div>
+        <div class="s metric"><div class="num">B2G/B2B</div><div class="lab">Dasturiy model</div></div>
+      </div>
+    </div>
+    <div class="foot anim">
+      <span class="micro">Tasdiqlangan bozor asoslari</span>
+      <span class="micro">Skrining oqimidan daromad</span>
+    </div>
+  </section>
+
+  <!-- 02 — PROBLEM -->
+  <section class="slide light">
+    <div class="head anim">
+      <div class="ttl">
+        <div class="micro">01 · Muammo</div>
+        <h2>Diabet koʻpaymoqda. Koʻzdagi zarar esa kech seziladi.</h2>
+      </div>
+    </div>
+    <div class="body">
+      <div class="g2 anim">
+        <div class="stack">
+          <p class="lead">Asosiy toʻsiq kamera emas — <span class="accent">tor joy mutaxassis baholash quvvati.</span></p>
+          <p>Diabetik retinopatiya ishchi yoshdagi kattalarda oldini olsa boʻladigan koʻrlikning yetakchi sabablaridan. U koʻrish yoʻqolguncha ovozsiz rivojlanadi; har bir diabet bemori muntazam retinal skriningni talab qiladi. Ammo har bir fundus suratini koʻz shifokori qoʻlda baholasa — tizim shu yerda tiqiladi.</p>
+        </div>
+        <div class="g2" style="gap:16px">
+          <div class="card tick metric">
+            <div class="num">1.5M</div>
+            <div class="lab">Oʻzbekistonda diabet bilan yashayotgan kattalar (IDF 2024)</div>
+          </div>
+          <div class="card tick metric">
+            <div class="num">2.2M</div>
+            <div class="lab">2050 yilga prognoz qilingan diabet bemorlari</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot anim">
+      <span class="src">Manba: IDF Diabetes Atlas — Oʻzbekiston mamlakat sahifasi, 2024 / 2050 prognozi.</span>
+    </div>
+  </section>
+
+  <!-- 03 — CLINICAL SCALE -->
+  <section class="slide light">
+    <div class="head anim">
+      <div class="ttl">
+        <div class="micro">02 · Klinik zarurat</div>
+        <h2>Retinopatiya kam uchraydigan muammo emas.</h2>
+      </div>
+    </div>
+    <div class="body stack anim">
+      <div class="g3">
+        <div class="card tick metric">
+          <div class="kicker">Tarqalish</div>
+          <div class="num">34.6%</div>
+          <div class="lab">Jahon tadqiqotlarida diabet bemorlarida har qanday DR (Yau 2012)</div>
+        </div>
+        <div class="card tick metric">
+          <div class="kicker">Oʻzbekistonga qoʻllansa</div>
+          <div class="num">~520k</div>
+          <div class="lab">DR belgilari boʻlishi mumkin boʻlgan bemorlar</div>
+        </div>
+        <div class="card tick metric" style="border-color:rgba(192,57,43,0.35)">
+          <div class="kicker" style="color:var(--g4)">Koʻrishga xavf</div>
+          <div class="num" style="color:var(--g4)">~150k</div>
+          <div class="lab">Koʻrishga xavf soluvchi DR (~10.2% jahon koʻrsatkichi)</div>
+        </div>
+      </div>
+      <div class="ramp">
+        <span style="background:var(--g0)"></span>
+        <span style="background:var(--g1)"></span>
+        <span style="background:var(--g2)"></span>
+        <span style="background:var(--g3)"></span>
+        <span style="background:var(--g4)"></span>
+      </div>
+      <div class="band">
+        <p><strong>Biz tashxis sotmaymiz.</strong> KoʻzNur shifokor qarorini almashtirmaydi — u mavjud skrining oqimini tezlashtiradi: normal suratlar tez ajraladi, xavfli holatlar mutaxassisga yoʻnaltiriladi.</p>
+      </div>
+    </div>
+    <div class="foot anim">
+      <span class="src">Manba: Yau et al., Diabetes Care 2012. Hisob: 1.5M × 34.6% ≈ 520k; 1.5M × 10.2% ≈ 150k.</span>
+    </div>
+  </section>
+
+  <!-- 04 — SOLUTION + mvp-home screenshot -->
+  <section class="slide light">
+    <div class="head anim">
+      <div class="ttl">
+        <div class="micro">03 · Yechim</div>
+        <h2>Bir surat. Bir triage javobi. Bir aniq keyingi qadam.</h2>
+      </div>
+    </div>
+    <div class="body">
+      <div class="g2 anim" style="grid-template-columns:0.96fr 1.04fr">
+        <div class="stack">
+          <p>KoʻzNur fundus suratini qabul qiladi va <strong style="color:var(--ink)">ICDR 0–4</strong> darajasini, yoʻnaltirish belgisini (daraja ≥ 2 = <span class="amber-tx">referable</span>), ishonch foizini va Grad-CAM issiqlik xaritasini qaytaradi.</p>
+          <ul class="clean">
+            <li>Konsol — React (Vite + Tailwind) instrument interfeysi</li>
+            <li>Server — FastAPI · dvigatel PyTorch (Apple Silicon / MPS)</li>
+            <li>Pozitsiya — saralash / qaror yordamchisi, tashxis EMAS</li>
+            <li>Mavjud skrining tarmogʻini modernizatsiya qiladi, shifokorni almashtirmaydi</li>
+          </ul>
+          <span class="pill">Jonli mahsulot · MVP demo</span>
+        </div>
+        <div class="mount">
+          <div class="bar">
+            <div class="dots"><i></i><i></i><i></i></div>
+            <div class="cap">KoʻzNur · Skrining konsoli</div>
+          </div>
+          <div class="screen"><img src="mvp-home.png" alt="KoʻzNur skrining konsoli — bosh ekran"></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot anim">
+      <span class="src">Klinik pozitsiya: AI saralash yordamchisi. Yakuniy qaror malakali oftalmolog yoki tasdiqlangan klinik protokol orqali qabul qilinadi.</span>
+    </div>
+  </section>
+
+  <!-- 05 — HOW IT WORKS + mvp-result-severe -->
+  <section class="slide light">
+    <div class="head anim">
+      <div class="ttl">
+        <div class="micro">04 · Qanday ishlaydi</div>
+        <h2>Quvurning har bosqichi izohlanadi.</h2>
+      </div>
+    </div>
+    <div class="body stack anim">
+      <div class="flow stagger">
+        <div class="step"><div class="sn">01</div><h3>Fundus surati</h3><p>Skrining punktida olinadi.</p></div>
+        <div class="step"><div class="sn">02</div><h3>Ben-Graham kesim</h3><p>Radius shkalasi → 288 → 256 → ImageNet normalizatsiya.</p></div>
+        <div class="step"><div class="sn">03</div><h3>Regressiya · 5-fold</h3><p>SE-ResNeXt50 ansambl → ostona [0.5–3.5].</p></div>
+        <div class="step"><div class="sn">04</div><h3>Grad-CAM</h3><p>Model diqqat qaratgan hudud koʻrsatiladi.</p></div>
+        <div class="step"><div class="sn">05</div><h3>Triage javobi</h3><p>ICDR daraja, ishonch, referable belgisi.</p></div>
+      </div>
+      <div class="g2" style="grid-template-columns:1.1fr 0.9fr; align-items:center; gap:clamp(24px,3vw,48px)">
+        <div class="mount">
+          <div class="bar">
+            <div class="dots"><i></i><i></i><i></i></div>
+            <div class="cap">Natija · Severe · Referable</div>
+          </div>
+          <div class="screen"><img src="mvp-result-severe.png" alt="KoʻzNur natija — Grad-CAM, Severe daraja, amber referable ogohlantirish"></div>
+        </div>
+        <div class="stack">
+          <p class="lead" style="font-size:clamp(18px,1.9vw,26px)">Eski prototip proliferativ holatlarni xato ravishda «No DR» deb baholar edi.</p>
+          <p>Joriy dvigatel ularni ishonchli ravishda <span class="amber-tx">referable</span> (Severe / Proliferative) deb belgilaydi. Amber rang faqat shu yoʻnaltirish ogohlantirishi uchun ishlatiladi.</p>
+        </div>
+      </div>
+    </div>
+    <div class="foot anim">
+      <span class="src">Quvur faktik tavsifi. Grad-CAM oxirgi konvolyutsion blokda hisoblanadi.</span>
+    </div>
+  </section>
+
+  <!-- 06 — PERFORMANCE -->
+  <section class="slide light">
+    <div class="head anim">
+      <div class="ttl">
+        <div class="micro">05 · Samaradorlik</div>
+        <h2>Oʻlchangan natijalar — oshirilmagan, himoyalanadigan.</h2>
+      </div>
+    </div>
+    <div class="body stack anim">
+      <div class="g4 stagger">
+        <div class="card tick metric"><div class="kicker">5-fold CV</div><div class="num">~0.92</div><div class="lab">QWK kelishuv koeffitsiyenti</div></div>
+        <div class="card tick metric"><div class="kicker">Referable</div><div class="num">~0.92–0.95</div><div class="lab">Sezgirlik (yoʻnaltirish)</div></div>
+        <div class="card tick metric"><div class="kicker">No-DR</div><div class="num">~0.98</div><div class="lab">Normal holat recall</div></div>
+        <div class="card tick metric" style="border-color:rgba(232,131,58,0.35)"><div class="kicker" style="color:var(--amber)">Halol eslatma</div><div class="num" style="font-size:clamp(26px,3vw,40px)">~0.48–0.59</div><div class="lab">Ogʻir/proliferativ recall — qiyin, lekin referable belgilanadi</div></div>
+      </div>
+      <div class="band">
+        <p><strong>Halol sarlavha.</strong> APTOS held-out splitda QWK 0.93 va referable sezgirligi 0.978 oʻlchandi, ammo bu split taqsimot ichida edi — shuning uchun biz konservativ ~0.92 QWK va ~0.92–0.95 referable sezgirligini taqdim etamiz. Ogʻir darajalar haqiqatan qiyin, lekin notoʻgʻri «yoʻq» emas — ular referable deb toʻgʻri belgilanadi.</p>
+      </div>
+    </div>
+    <div class="foot anim">
+      <span class="src">Sohada isbot: Gulshan et al., JAMA 2016 — chuqur CNN, referable-DR AUC ≈ 0.991. APTOS 2019: regressiya + ostona, Ben-Graham, EyePACS pretrening; LB QWK ≈ 0.93.</span>
+    </div>
+  </section>
+
+  <!-- 07 — MARKET / TAM-SOM -->
+  <section class="slide light">
+    <div class="head anim">
+      <div class="ttl">
+        <div class="micro">06 · Bozor hajmi</div>
+        <h2>Bozorni oshirmaymiz — hisobni ochiq koʻrsatamiz.</h2>
+      </div>
+    </div>
+    <div class="body stack anim">
+      <div class="g3 stagger">
+        <div class="card tick metric">
+          <span class="pill">TAM</span>
+          <div class="num" style="font-size:clamp(24px,2.6vw,38px)">0.75–1.5M</div>
+          <div class="lab">skrining/yil — 1.5M bemor; yillik kadensda 1.5M, 2 yillikda 0.75M</div>
+        </div>
+        <div class="card tick metric">
+          <span class="pill">Dasturiy daromad TAM</span>
+          <div class="num" style="font-size:clamp(24px,2.6vw,38px)">6–18 mlrd</div>
+          <div class="lab">soʻm/yil — 8,000–12,000 soʻm × 0.75–1.5M skrining</div>
+        </div>
+        <div class="card tick metric">
+          <span class="pill">SOM · 18 oy</span>
+          <div class="num" style="font-size:clamp(24px,2.6vw,38px)">30–60k</div>
+          <div class="lab">skrining/yil — 3–6 pilot sayt → 240–720M soʻm/yil</div>
+        </div>
+      </div>
+      <div class="band">
+        <div class="g3">
+          <div class="metric"><div class="num">$0.5M+</div><div class="lab">Faqat Oʻzbekiston boʻyicha konservativ yillik chegara</div></div>
+          <div class="metric"><div class="num">$1.5M</div><div class="lab">Yuqoriroq milliy AI-toʻlov ssenariysi</div></div>
+          <div class="metric"><div class="num">10×</div><div class="lab">Platforma kengayishi: glaukoma, AMD, gipertenziv retinopatiya, Markaziy Osiyo</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot anim">
+      <span class="src">Farazlar: IDF boʻyicha 1.5M bemor; 8,000–12,000 soʻm modellashtirilgan AI toʻlovi; USD ≈ 12,013 soʻm (CBU, 2026-06).</span>
+    </div>
+  </section>
+
+  <!-- 08 — BUSINESS MODEL -->
+  <section class="slide light">
+    <div class="head anim">
+      <div class="ttl">
+        <div class="micro">07 · Biznes model</div>
+        <h2>Kamera sotmaymiz — skrining oqimidan daromad olamiz.</h2>
+      </div>
+    </div>
+    <div class="body stack anim">
+      <div class="g3 stagger">
+        <div class="card tick">
+          <span class="pill">01 · Asosiy oqim</span>
+          <h3 style="margin-top:12px">Har skrining uchun AI toʻlovi</h3>
+          <p style="margin-top:8px">Har tahlil qilingan fundus surati uchun <span class="mono" style="color:var(--ink)">8,000–12,000</span> soʻm. Klinika uchun arzon, KoʻzNur uchun takrorlanadigan.</p>
+        </div>
+        <div class="card tick">
+          <span class="pill">02 · Litsenziya</span>
+          <h3 style="margin-top:12px">Region / klinika litsenziyasi</h3>
+          <p style="margin-top:8px">Dashboard, foydalanuvchi hisoblari, audit izi, PDF hisobot, integratsiya va statistika uchun oylik/yillik toʻlov.</p>
+        </div>
+        <div class="card tick">
+          <span class="pill">03 · Validatsiya</span>
+          <h3 style="margin-top:12px">Validatsiya paketi</h3>
+          <p style="margin-top:8px">Pilotda lokal suratlarni ekspert baholaydi → klinik samaradorlik hisoboti va procurement uchun asos.</p>
+        </div>
+      </div>
+      <div class="g2" style="gap:clamp(20px,2.4vw,40px)">
+        <div class="card">
+          <div class="micro" style="margin-bottom:12px">Kim toʻlaydi?</div>
+          <ul class="clean">
+            <li>Davlat skrining dasturlari (B2G)</li>
+            <li>Koʻz klinikalari va diagnostika markazlari</li>
+            <li>Diabet markazlari va xususiy tibbiy tarmoqlar</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="micro" style="margin-bottom:12px">Nega ularga kerak?</div>
+          <ul class="clean">
+            <li>Koʻproq bemorni kamroq shifokor vaqti bilan qamrash</li>
+            <li>Referral oqimini tartibga solish</li>
+            <li>Aniq KPI: nechta skrining, xavfli holat, follow-up</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="foot anim">
+      <span class="src">Monetizatsiya throughput-ga bogʻlangan: qurilma emas, baholangan skrining hajmi sotiladi.</span>
+    </div>
+  </section>
+
+  <!-- 09 — COMPETITION -->
+  <section class="slide light">
+    <div class="head anim">
+      <div class="ttl">
+        <div class="micro">08 · Raqobat</div>
+        <h2>Dunyo miqyosida isbot bor — mahalliy ijro hali ochiq.</h2>
+      </div>
+    </div>
+    <div class="body anim">
+      <div class="table">
+        <div class="trow thead">
+          <div class="tc">Variant</div>
+          <div class="tc">Kuchli tomoni</div>
+          <div class="tc">Oʻzbekiston uchun muammo</div>
+          <div class="tc">KoʻzNur javobi</div>
+        </div>
+        <div class="trow">
+          <div class="tc"><strong>Oftalmolog qoʻlda baholashi</strong></div>
+          <div class="tc">Klinik ishonch</div>
+          <div class="tc">Kengaytirish qiyin — mutaxassis vaqti tor joy</div>
+          <div class="tc"><span class="ok">AI saralash</span> shifokor vaqtini faqat xavfli holatlarga yoʻnaltiradi</div>
+        </div>
+        <div class="trow">
+          <div class="tc"><strong>Xorijiy AI tizimlari</strong></div>
+          <div class="tc">Isbotlangan yoʻnalish, regulyator misollari</div>
+          <div class="tc">Narx, lokalizatsiya, integratsiya, xarid jarayoni</div>
+          <div class="tc"><span class="ok">Mahalliy narx</span> + oʻzbek/rus ish oqimi</div>
+        </div>
+        <div class="trow">
+          <div class="tc"><strong>Faqat kamerali skrining</strong></div>
+          <div class="tc">Suratlar yigʻiladi</div>
+          <div class="tc">Baholash tor joyi saqlanadi</div>
+          <div class="tc"><span class="ok">Risk bahosi</span> + yoʻnaltirish dashboardi</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot anim">
+      <span class="src">Sohada chuqur oʻrganilgan AI DR tizimlari va prospektiv klinik validatsiyalar yoʻnalish ishlashini koʻrsatgan. KoʻzNur ustunligi DR AI ni ixtiro qilish emas — lokal validatsiya, narx va ish oqimiga integratsiyada.</span>
+    </div>
+  </section>
+
+  <!-- 10 — FINANCIAL MODEL -->
+  <section class="slide light">
+    <div class="head anim">
+      <div class="ttl">
+        <div class="micro">09 · Iqtisodiy model</div>
+        <h2>Past CAPEX, yuqori takrorlanish, ehtiyotkor margin.</h2>
+      </div>
+    </div>
+    <div class="body">
+      <div class="g2 anim" style="gap:clamp(28px,3.6vw,60px)">
+        <div class="stack">
+          <p class="lead">Eng muhim tanlov: qurilma sotish biznesiga kirmaymiz.</p>
+          <p>KoʻzNur mavjud fundus kameralar va skrining punktlariga ulanadi. Xarajatlar asosan bulutli inferens, texnik qoʻllab-quvvatlash, lokal validatsiya va integratsiyadan iborat.</p>
+        </div>
+        <div class="card bars">
+          <div class="bar"><span class="bl">Qurilma zaxirasi (CAPEX)</span><div class="btrack"><div class="bfill" style="--w:6%"></div></div><span class="bv">minimal</span></div>
+          <div class="bar"><span class="bl">Takrorlanadigan daromad</span><div class="btrack"><div class="bfill" style="--w:86%"></div></div><span class="bv">yuqori</span></div>
+          <div class="bar"><span class="bl">Maqsadli yalpi marja</span><div class="btrack"><div class="bfill" style="--w:75%"></div></div><span class="bv">70–80%</span></div>
+          <div class="bar"><span class="bl">Sotuv sikli (B2G)</span><div class="btrack"><div class="bfill" style="--w:64%"></div></div><span class="bv">sekin</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot anim">
+      <span class="src">Marja — bulutli infratuzilma, qoʻllab-quvvatlash, QA, validatsiya va integratsiya xarajatlaridan keyingi MAQSADLI koʻrsatkich; isbotlangan natija sifatida taqdim etilmaydi.</span>
+    </div>
+  </section>
+
+  <!-- 11 — GTM + WHY NOW -->
+  <section class="slide light">
+    <div class="head anim">
+      <div class="ttl">
+        <div class="micro">10 · Bozorga chiqish · Nega endi</div>
+        <h2>Procurementga sakramaymiz — avval validatsiya, keyin kontrakt.</h2>
+      </div>
+    </div>
+    <div class="body stack anim">
+      <div class="timeline">
+        <div class="phase">
+          <div class="mono kicker">0–30 kun</div>
+          <div class="ph-rule"><div class="ph-fill"></div></div>
+          <h3>MVP demo</h3>
+          <ul class="clean"><li>Konsol + PDF hisobot</li><li>Grad-CAM izohi</li><li>Triage javobi</li></ul>
+        </div>
+        <div class="phase">
+          <div class="mono kicker">1–3 oy</div>
+          <div class="ph-rule"><div class="ph-fill"></div></div>
+          <h3>Lokal validatsiya</h3>
+          <ul class="clean"><li>500–1,000 anonim surat</li><li>Oftalmolog baholari</li><li>Sezgirlik/spetsifiklik</li></ul>
+        </div>
+        <div class="phase">
+          <div class="mono kicker">3–9 oy</div>
+          <div class="ph-rule"><div class="ph-fill"></div></div>
+          <h3>Pilot shartnoma</h3>
+          <ul class="clean"><li>1 region / 3–6 sayt</li><li>30k–60k skrining/yil</li><li>Yoʻnaltirish KPI</li></ul>
+        </div>
+        <div class="phase">
+          <div class="mono kicker">9–18 oy</div>
+          <div class="ph-rule"><div class="ph-fill"></div></div>
+          <h3>Kengayish</h3>
+          <ul class="clean"><li>Regionlarga joriy</li><li>Davlat xaridi asosi</li><li>Yangi ko‘z modullari</li></ul>
+        </div>
+      </div>
+      <div class="band">
+        <p><strong>Hakamga javob:</strong> «Agar buni 2 kunda kodlash mumkin boʻlsa, nega hali joriy qilinmagan?» — Chunki model demosi eng qiyin qism emas. Qiyin qismlar: lokal klinik validatsiya, ishonch, ish oqimiga integratsiya, xarid jarayoni va keyingi nazorat. KoʻzNur aynan shu toʻsiqlardan oʻtishning aniq kirish nuqtasi va ishonchli yoʻlini koʻrsatadi.</p>
+      </div>
+    </div>
+    <div class="foot anim">
+      <span class="src">Tijoriy yoʻl klinik, regulyator va ishonch risklarini kamaytirish uchun ataylab bosqichma-bosqich qurilgan.</span>
+    </div>
+  </section>
+
+  <!-- 12 — ASK + LIMITATIONS + CLOSE -->
+  <section class="slide dark">
+    <div class="head anim">
+      <div class="ttl">
+        <div class="micro">11 · Bizga kerak · Yopilish</div>
+        <h2>Puldan oldin — pilot maydon va klinik tekshiruv.</h2>
+      </div>
+    </div>
+    <div class="body stack anim">
+      <div class="g3 stagger">
+        <div class="card metric"><span class="pill">Klinik hamkor</span><div class="num" style="font-size:clamp(22px,2.4vw,34px); margin-top:10px">1 ta sayt</div><div class="lab">Real fundus kamera ish oqimi, operator fikri, real surat sifati.</div></div>
+        <div class="card metric"><span class="pill">Validatsiya</span><div class="num" style="font-size:clamp(22px,2.4vw,34px); margin-top:10px">500–1,000</div><div class="lab">Oftalmolog baholangan, anonimlashtirilgan lokal fundus suratlari.</div></div>
+        <div class="card metric"><span class="pill">Pilot budjet</span><div class="num" style="font-size:clamp(22px,2.4vw,34px); margin-top:10px">150–300M</div><div class="lab">soʻm — belgilash, QA, joriy qilish, bulut, hisobot, birinchi pilot.</div></div>
+      </div>
+      <div class="g2" style="gap:clamp(20px,2.4vw,40px); align-items:start">
+        <div class="card">
+          <div class="micro" style="color:var(--teal); margin-bottom:12px">Muvaffaqiyat mezoni</div>
+          <p>30–45 kun: yoʻnaltiriladigan DR boʻyicha validatsiya hisoboti. 3–6 oy: koʻproq skrining qilingan bemor, kamroq keraksiz baholash, tasdiqlangan yoʻnaltirish nazorati.</p>
+        </div>
+        <div class="card" style="border-color:rgba(232,131,58,0.4)">
+          <div class="micro amber-tx" style="margin-bottom:12px">Halol cheklovlar</div>
+          <ul class="clean" style="color:rgba(255,255,255,0.74)">
+            <li style="color:rgba(255,255,255,0.74)">Surat sifatiga bogʻliqlik</li>
+            <li style="color:rgba(255,255,255,0.74)">Ogʻir darajalar — qiyinroq</li>
+            <li style="color:rgba(255,255,255,0.74)">Prospektiv klinik validatsiya zarur</li>
+            <li style="color:rgba(255,255,255,0.74)">Maʼlumot maxfiyligi va etika</li>
+          </ul>
+        </div>
+      </div>
+      <div class="band" style="background:var(--shell-2)">
+        <p style="font-size:clamp(16px,1.6vw,24px)"><strong>Arzon. Takrorlanadigan. Kengayadigan.</strong> Oʻzbekistonda diabetik koʻrlikka qarshi skriningni shifokor vaqtiga bogʻlab qoʻymaymiz — biz mutaxassisni voronkaning oldidan olib tashlaymiz, ular faqat referable ~20–30% ni koʻradi.</p>
+      </div>
+    </div>
+    <div class="foot anim">
+      <span class="micro">Zeno jamoasi · KoʻzNur</span>
+      <span class="micro" style="color:var(--teal)">Rahmat. Savollar?</span>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const progress = document.getElementById('progress');
+  const cur = document.getElementById('cur');
+  const tot = document.getElementById('tot');
+  let index = 0;
+  tot.textContent = String(slides.length).padStart(2,'0');
+
+  function show(n){
+    index = Math.max(0, Math.min(slides.length-1, n));
+    slides.forEach((s,i)=> s.classList.toggle('active', i===index));
+    progress.style.width = ((index+1)/slides.length*100)+'%';
+    cur.textContent = String(index+1).padStart(2,'0');
+    history.replaceState(null,'','#'+(index+1));
+  }
+
+  document.getElementById('next').addEventListener('click', ()=>show(index+1));
+  document.getElementById('prev').addEventListener('click', ()=>show(index-1));
+
+  document.addEventListener('keydown', (e)=>{
+    const fwd = ['ArrowRight','ArrowDown','PageDown',' ','Enter'];
+    const back = ['ArrowLeft','ArrowUp','PageUp','Backspace'];
+    if (fwd.includes(e.key)){ e.preventDefault(); show(index+1); }
+    else if (back.includes(e.key)){ e.preventDefault(); show(index-1); }
+    else if (e.key.toLowerCase()==='f'){
+      if (document.fullscreenElement) document.exitFullscreen?.();
+      else document.documentElement.requestFullscreen?.();
+    }
+  });
+
+  function fromHash(){
+    const n = Number(location.hash.replace('#',''));
+    if (Number.isFinite(n) && n>=1 && n<=slides.length) show(n-1);
+    else show(0);
+  }
+  window.addEventListener('hashchange', fromHash);
+  fromHash();
+</script>
+</body>
+</html>
