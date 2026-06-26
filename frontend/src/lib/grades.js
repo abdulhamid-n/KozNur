@@ -41,6 +41,13 @@ export const GRADES = [
 
 export const REFERABLE_THRESHOLD = 2
 
+// Calibrated grade ramp: green -> lime -> amber -> orange -> clinical red.
+export const GRADE_RAMP = ['#1F9D74', '#7FB23A', '#E0A82E', '#DB7C26', '#C0392B']
+
+export function gradeColor(grade) {
+  return GRADE_RAMP[grade] || GRADE_RAMP[0]
+}
+
 export function isReferable(grade) {
   return typeof grade === 'number' && grade >= REFERABLE_THRESHOLD
 }

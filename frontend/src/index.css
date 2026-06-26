@@ -5,6 +5,9 @@
 @layer base {
   :root {
     color-scheme: light;
+    --hairline: rgba(14, 26, 36, 0.12);
+    --hairline-strong: rgba(14, 26, 36, 0.18);
+    --hairline-dark: rgba(255, 255, 255, 0.08);
   }
 
   html {
@@ -14,46 +17,137 @@
   }
 
   body {
-    @apply bg-mist text-ink font-sans antialiased;
+    @apply bg-exam-50 font-sans text-ink antialiased;
     margin: 0;
     min-height: 100vh;
+    /* Faint engineering grid across the whole console — reads as instrument bench. */
+    background-color: #eef2f3;
+    background-image:
+      linear-gradient(to right, rgba(14, 26, 36, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(14, 26, 36, 0.035) 1px, transparent 1px);
+    background-size: 38px 38px;
   }
 
-  /* Subtle calm clinical background wash */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background:
-      radial-gradient(900px 420px at 88% -8%, rgba(15, 131, 140, 0.07), transparent 60%),
-      radial-gradient(820px 420px at -6% 4%, rgba(11, 61, 102, 0.06), transparent 55%);
-    pointer-events: none;
+  /* Numerics are ALWAYS monospace + tabular — the instrument signature. */
+  .num {
+    font-family: theme('fontFamily.mono');
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1, 'zero' 1;
   }
 }
 
 @layer components {
+  /* Uppercase tracked micro-label — used across every panel header. */
+  .micro-label {
+    @apply font-mono text-[0.62rem] font-medium uppercase tracking-micro;
+  }
+
+  /* Hairline rule helpers */
+  .rule-x {
+    @apply border-b;
+    border-color: var(--hairline);
+  }
+
+  /* Skeleton shimmer on light surfaces */
   .skeleton {
-    background-image: linear-gradient(
+    position: relative;
+    overflow: hidden;
+    background: theme('colors.exam.100');
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
       90deg,
-      rgba(11, 61, 102, 0.06) 0px,
-      rgba(11, 61, 102, 0.12) 40px,
-      rgba(11, 61, 102, 0.06) 80px
+      transparent,
+      rgba(255, 255, 255, 0.7),
+      transparent
     );
-    background-size: 800px 100%;
-    @apply animate-shimmer rounded-md;
+    animation: skeleton-sweep 1.5s ease-in-out infinite;
+  }
+  @keyframes skeleton-sweep {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Skeleton on the dark stage */
+  .skeleton-dark {
+    position: relative;
+    overflow: hidden;
+    background: theme('colors.shell.700');
+  }
+  .skeleton-dark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.08),
+      transparent
+    );
+    animation: skeleton-sweep 1.5s ease-in-out infinite;
   }
 }
 
-/* Custom scrollbar — quiet and clinical */
+/* Quiet, clinical scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(11, 61, 102, 0.18);
+  background: rgba(14, 26, 36, 0.18);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(11, 61, 102, 0.3);
+  background: rgba(14, 26, 36, 0.3);
+}
+
+/* Range input — opacity slider styled as an instrument control */
+input[type='range'].instrument-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  outline: none;
+}
+input[type='range'].instrument-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #0fb5ba;
+  border: 2px solid #0e1a24;
+  box-shadow: 0 0 0 1px rgba(15, 181, 186, 0.5);
+  cursor: pointer;
+}
+input[type='range'].instrument-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #0fb5ba;
+  border: 2px solid #0e1a24;
+  cursor: pointer;
+}
+input[type='range'].instrument-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(15, 181, 186, 0.4);
+}
+
+/* Reduced motion — kill all purposeful animation. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

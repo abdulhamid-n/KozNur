@@ -1,7 +1,11 @@
-// Clean KoʻzNur logotype: an "eye-light" mark + wordmark.
-// Calm, medical, not flashy. Navy + teal only.
+// KoʻzNur instrument mark: a reticle-eye — measurement ticks around a
+// fovea pupil. Reads as an aligned optical instrument, not a soft brand blob.
 
-export function LogoMark({ size = 36, className = '' }) {
+export function LogoMark({ size = 34, className = '', tone = 'light' }) {
+  // tone="light" -> for dark backgrounds (header on shell)
+  const ring = tone === 'light' ? '#0FB5BA' : '#0F838C'
+  const tick = tone === 'light' ? 'rgba(255,255,255,0.55)' : 'rgba(14,26,36,0.45)'
+  const core = tone === 'light' ? '#F6F8F9' : '#0E1A24'
   return (
     <svg
       width={size}
@@ -12,31 +16,47 @@ export function LogoMark({ size = 36, className = '' }) {
       role="img"
       aria-label="KoʻzNur belgisi"
     >
-      <rect width="64" height="64" rx="15" fill="#0B3D66" />
-      <path
-        d="M12 32c0-7 9-13 20-13s20 6 20 13-9 13-20 13S12 39 12 32Z"
-        stroke="#0F838C"
-        strokeWidth="3.5"
-        fill="none"
-      />
-      <circle cx="32" cy="32" r="8.5" fill="#0F838C" />
-      <circle cx="32" cy="32" r="3.4" fill="#ffffff" />
-      <circle cx="34.6" cy="29.4" r="1.5" fill="#ffffff" opacity="0.9" />
+      {/* outer measurement ring */}
+      <circle cx="32" cy="32" r="26" stroke={ring} strokeWidth="2" opacity="0.9" />
+      {/* corner reticle ticks */}
+      <g stroke={tick} strokeWidth="2" strokeLinecap="round">
+        <path d="M32 4v7" />
+        <path d="M32 53v7" />
+        <path d="M4 32h7" />
+        <path d="M53 32h7" />
+      </g>
+      {/* iris */}
+      <circle cx="32" cy="32" r="13" stroke={ring} strokeWidth="2.5" />
+      {/* fovea pupil */}
+      <circle cx="32" cy="32" r="5.5" fill={ring} />
+      <circle cx="32" cy="32" r="2" fill={core} />
     </svg>
   )
 }
 
-export default function Logo({ size = 36, withWordmark = true }) {
+export default function Logo({ size = 34, withWordmark = true, tone = 'light' }) {
+  const dark = tone === 'light'
   return (
-    <span className="inline-flex items-center gap-2.5 select-none">
-      <LogoMark size={size} />
+    <span className="inline-flex select-none items-center gap-2.5">
+      <LogoMark size={size} tone={tone} />
       {withWordmark && (
         <span className="flex flex-col leading-none">
-          <span className="text-[1.35rem] font-extrabold tracking-tight text-navy">
-            Ko‘z<span className="text-teal">Nur</span>
+          <span
+            className={[
+              'font-display text-[1.28rem] font-700 tracking-tight',
+              dark ? 'text-exam-50' : 'text-ink',
+            ].join(' ')}
+            style={{ fontWeight: 700 }}
+          >
+            Koʻz<span className="text-instrument">Nur</span>
           </span>
-          <span className="mt-0.5 text-[0.62rem] font-medium uppercase tracking-[0.18em] text-navy/55">
-            Skrining yordamchisi
+          <span
+            className={[
+              'micro-label mt-1',
+              dark ? 'text-white/45' : 'text-ink-55',
+            ].join(' ')}
+          >
+            Retinal screening console
           </span>
         </span>
       )}

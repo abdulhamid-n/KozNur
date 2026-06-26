@@ -140,11 +140,18 @@ function normalizeSample(s, i) {
     return { id: String(i), url: s, name: s.split('/').pop() }
   }
   const url = s.url || s.image || s.image_url || s.path || s.src || ''
+  const grade =
+    typeof s.grade === 'number'
+      ? s.grade
+      : typeof s.expected_grade === 'number'
+        ? s.expected_grade
+        : undefined
   return {
     id: s.id != null ? String(s.id) : String(i),
     url,
     name: s.name || s.label || s.title || (url ? url.split('/').pop() : `Namuna ${i + 1}`),
-    grade: typeof s.grade === 'number' ? s.grade : undefined,
+    grade,
+    referable: typeof s.referable === 'boolean' ? s.referable : undefined,
     thumb: s.thumb || s.thumbnail || undefined,
   }
 }
