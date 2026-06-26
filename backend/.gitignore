@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Local model snapshots (use scripts/download_weights.sh to fetch)
+models/
+
+# Fetched demo images (regenerate with scripts/fetch_samples.py).
+# Keep the manifest + any hand-curated images you commit explicitly.
+samples/aptos_grade*.png
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

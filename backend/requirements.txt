@@ -1,0 +1,27 @@
+# KoʻzNur backend — Phase A (wrap an already-trained DR classifier)
+# Python 3.11+ (tested intent: 3.11/3.13). Install into a venv (see README.md).
+#
+# Version notes:
+#  - torch/torchvision: 2.2+ has stable MPS for ViT inference on Apple Silicon.
+#    Floor 2.2; no tight ceiling because Python 3.13 only ships torch>=2.6
+#    wheels. Verified working on torch 2.6+ with the pytorch-grad-cam hooks and
+#    the transformers .bin load path.
+#  - transformers: 4.38+ ships AutoImageProcessor + ViTForImageClassification
+#    used here. <5 to avoid an untested major bump.
+#  - grad-cam: the `pytorch_grad_cam` package (import name pytorch_grad_cam).
+
+fastapi>=0.110,<1.0
+uvicorn[standard]>=0.27,<1.0
+python-multipart>=0.0.9        # required by FastAPI for multipart/form-data uploads
+
+torch>=2.2
+torchvision>=0.17
+
+transformers>=4.38,<5.0
+huggingface-hub>=0.20
+
+grad-cam>=1.5.0,<2.0          # import: pytorch_grad_cam
+
+pillow>=10.0
+opencv-python-headless>=4.8   # headless: no GUI libs needed on a server
+numpy>=1.24
