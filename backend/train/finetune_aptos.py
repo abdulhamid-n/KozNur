@@ -129,7 +129,23 @@ def _ben_graham(pil_img):
         return pil_img  # if cv2 path unavailable, skip gracefully
 
 
-def build_transforms(img_size: int, ben_graham: bool, train: bool):
+class _Preprocess:
+    """Picklable preprocessing callable. Module-level (NOT a closure) so the
+    DataLoader's worker processes can pickle it under macOS 'spawn'. Converts to
+    RGB -> retina crop -> optional Ben Graham, reusing the serving code path."""
+
+    def __init__(self, ben_graham: bool):
+        self.ben_graham = ben_graham
+
+    def __call__(self, pil_img):
+        out = pil_img.convert("RGB")
+        out = _retina_crop(out)
+        if self.ben_graham:
+            out = _ben_graham(out)
+        return out
+
+
+def build_transforms(img_size: int, ben_graham: bool, train: bool, precropped: bool = False):
     """timm EfficientNet expects ImageNet mean/std. (Distinct from the Phase-A
     ViT's 0.5 stats — correct, because this is OUR pretrained backbone.)
     """
@@ -138,13 +154,6 @@ def build_transforms(img_size: int, ben_graham: bool, train: bool):
 
     IMAGENET_MEAN = (0.485, 0.456, 0.406)
     IMAGENET_STD = (0.229, 0.224, 0.225)
-
-    def _pre(pil_img):
-        out = pil_img.convert("RGB")
-        out = _retina_crop(out)
-        if ben_graham:
-            out = _ben_graham(out)
-        return out
 
     if train:
         aug = [
@@ -157,8 +166,10 @@ def build_transforms(img_size: int, ben_graham: bool, train: bool):
     else:
         aug = [transforms.Resize((img_size, img_size))]
 
+    # Cached dataset is already retina-cropped -> skip the per-epoch crop.
+    pre = [] if precropped else [_Preprocess(ben_graham)]
     return transforms.Compose(
-        [transforms.Lambda(_pre), *aug, transforms.ToTensor(),
+        [*pre, *aug, transforms.ToTensor(),
          transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD)]
     )
 
@@ -341,6 +352,12 @@ def run_epoch(model, loader, criterion, optimizer, device, train: bool):
 
             if train:
                 loss.backward()
+                # Gradient clipping as a divergence safety net only. Keep it
+                # GENEROUS (10.0): clipping too tightly (e.g. 1.0 vs natural norms
+                # ~10-30) shrinks every step and neutralizes class rebalancing,
+                # collapsing the model to the majority (No-DR). Imbalance is
+                # handled by the data sampler, not by amplifying the loss.
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=10.0)
                 optimizer.step()
 
             total_loss += float(loss.item()) * images.size(0)
@@ -385,6 +402,8 @@ def main() -> int:
     ap.add_argument("--num-workers", type=int, default=4)
     ap.add_argument("--ben-graham", action="store_true",
                     help="Enable Ben Graham + CLAHE preprocessing (default off).")
+    ap.add_argument("--precropped", action="store_true",
+                    help="Images already retina-cropped (skip per-epoch crop) — for the cached dataset.")
     ap.add_argument("--no-class-weights", action="store_true",
                     help="Disable class-weighted loss (default: weighted).")
     # Imbalance handling — the core fix for the severe-grade (3/4) collapse.
@@ -419,8 +438,8 @@ def main() -> int:
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
     # -- transforms --------------------------------------------------------
-    train_tf = build_transforms(args.img_size, args.ben_graham, train=True)
-    val_tf = build_transforms(args.img_size, args.ben_graham, train=False)
+    train_tf = build_transforms(args.img_size, args.ben_graham, train=True, precropped=args.precropped)
+    val_tf = build_transforms(args.img_size, args.ben_graham, train=False, precropped=args.precropped)
 
     # -- load data + stratified split -------------------------------------
     if args.data_root is not None:
@@ -480,11 +499,12 @@ def main() -> int:
         train_ds, batch_size=args.batch_size,
         shuffle=(train_sampler is None), sampler=train_sampler,
         num_workers=args.num_workers, pin_memory=(device.type == "cuda"),
-        drop_last=False,
+        persistent_workers=args.num_workers > 0, drop_last=False,
     )
     val_loader = DataLoader(
         val_ds, batch_size=args.batch_size, shuffle=False,
         num_workers=args.num_workers, pin_memory=(device.type == "cuda"),
+        persistent_workers=args.num_workers > 0,
     )
 
     # -- class weights for imbalance (ARCHITECTURE.md §3) ------------------
@@ -547,6 +567,18 @@ def main() -> int:
             best_qwk = m["quadratic_weighted_kappa"]
             best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
             best_metrics = m
+            # Hang/crash-safe: persist the best checkpoint to disk IMMEDIATELY,
+            # so a later MPS stall still leaves a usable model on disk.
+            torch.save(
+                {"state_dict": best_state, "backbone": args.backbone,
+                 "img_size": args.img_size, "num_classes": NUM_CLASSES,
+                 "icdr_labels": ICDR_LABELS, "referable_threshold": REFERABLE_THRESHOLD,
+                 "normalize": {"mean": [0.485, 0.456, 0.406], "std": [0.229, 0.224, 0.225]},
+                 "ben_graham": bool(args.ben_graham), "framework": "timm",
+                 "best_epoch": epoch, "metrics": best_metrics},
+                args.out_dir / "koznur_efficientnet.pt",
+            )
+            print(f"  -> saved best checkpoint (epoch {epoch}, QWK={best_qwk:.4f})", flush=True)
 
     elapsed = round(time.time() - t0, 1)
 
