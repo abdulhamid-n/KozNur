@@ -1,0 +1,112 @@
+{
+  "_about": "KoʻzNur demo fundus gallery — provenance manifest (ARCHITECTURE.md §3, §5). These are REAL, openly-licensed APTOS 2019 fundus photographs spanning the ICDR DR grades. 'true_grade' is the dataset's ICDR label (0-4) used for demo narration only; it is NOT a KoʻzNur model output. Referable = true_grade >= 2 (ARCHITECTURE.md §2). Regenerate/refresh with scripts/fetch_samples.py.",
+  "dataset": {
+    "name": "APTOS 2019 Blindness Detection (Aravind Eye Hospital, India)",
+    "grading_scale": "ICDR 5-level (0 No DR, 1 Mild, 2 Moderate, 3 Severe, 4 Proliferative)",
+    "referable_threshold": 2,
+    "fetch_source": {
+      "type": "huggingface_dataset",
+      "repo_id": "sngsfydy/aptos_train",
+      "split": "train",
+      "access": "public / ungated",
+      "url": "https://huggingface.co/datasets/sngsfydy/aptos_train",
+      "note": "Ungated HF mirror of the open APTOS 2019 competition training set (features: image, label=ICDR 0-4). Rows pulled via the HF datasets-server /rows API."
+    },
+    "license": "Open Kaggle competition / research-use data (APTOS 2019 Blindness Detection). Not a proprietary dataset. ARCHITECTURE.md §3 §6: state 'open competition data, research use'; do NOT claim a proprietary dataset.",
+    "license_url": "https://www.kaggle.com/competitions/aptos2019-blindness-detection/rules",
+    "fetched_at": "2026-06-26"
+  },
+  "samples": [
+    {
+      "id": "sample-no-dr-a",
+      "filename": "sample_00_grade0.jpg",
+      "true_grade": 0,
+      "grade_label": "No DR",
+      "referable": false,
+      "width": 819,
+      "height": 614,
+      "sha256_16": "8e548a69fef039bd",
+      "source_row_idx": 0,
+      "source": "sngsfydy/aptos_train [train]",
+      "license": "APTOS 2019 open competition / research-use"
+    },
+    {
+      "id": "sample-no-dr-b",
+      "filename": "sample_01_grade0.jpg",
+      "true_grade": 0,
+      "grade_label": "No DR",
+      "referable": false,
+      "width": 819,
+      "height": 614,
+      "sha256_16": "c9f9086ae51eb9c5",
+      "source_row_idx": 3,
+      "source": "sngsfydy/aptos_train [train]",
+      "license": "APTOS 2019 open competition / research-use"
+    },
+    {
+      "id": "sample-mild",
+      "filename": "sample_02_grade1.jpg",
+      "true_grade": 1,
+      "grade_label": "Mild",
+      "referable": false,
+      "width": 2416,
+      "height": 1736,
+      "sha256_16": "41e5f00fb789e242",
+      "source_row_idx": 17,
+      "source": "sngsfydy/aptos_train [train]",
+      "license": "APTOS 2019 open competition / research-use"
+    },
+    {
+      "id": "sample-moderate-a",
+      "filename": "sample_03_grade2.jpg",
+      "true_grade": 2,
+      "grade_label": "Moderate",
+      "referable": true,
+      "width": 3216,
+      "height": 2136,
+      "sha256_16": "a502e03ca86220bd",
+      "source_row_idx": 2,
+      "source": "sngsfydy/aptos_train [train]",
+      "license": "APTOS 2019 open competition / research-use"
+    },
+    {
+      "id": "sample-moderate-b",
+      "filename": "sample_04_grade2.jpg",
+      "true_grade": 2,
+      "grade_label": "Moderate",
+      "referable": true,
+      "width": 1504,
+      "height": 1000,
+      "sha256_16": "df1b54c38020d366",
+      "source_row_idx": 8,
+      "source": "sngsfydy/aptos_train [train]",
+      "license": "APTOS 2019 open competition / research-use"
+    },
+    {
+      "id": "sample-severe",
+      "filename": "sample_05_grade3.jpg",
+      "true_grade": 3,
+      "grade_label": "Severe",
+      "referable": true,
+      "width": 2416,
+      "height": 1736,
+      "sha256_16": "1034813d3a8af731",
+      "source_row_idx": 30,
+      "source": "sngsfydy/aptos_train [train]",
+      "license": "APTOS 2019 open competition / research-use"
+    },
+    {
+      "id": "sample-proliferative",
+      "filename": "sample_06_grade4.jpg",
+      "true_grade": 4,
+      "grade_label": "Proliferative",
+      "referable": true,
+      "width": 2588,
+      "height": 1958,
+      "sha256_16": "f8dfa4e8334002ed",
+      "source_row_idx": 1,
+      "source": "sngsfydy/aptos_train [train]",
+      "license": "APTOS 2019 open competition / research-use"
+    }
+  ]
+}

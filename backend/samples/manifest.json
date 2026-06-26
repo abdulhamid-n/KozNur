@@ -1,0 +1,47 @@
+{
+  "_comment": "Curated demo fundus gallery for GET /samples (ARCHITECTURE.md §5). Real APTOS 2019 fundus images pulled by scripts/fetch_samples.py (see samples.json for full provenance + licensing). Entries whose file is missing on disk are skipped automatically, and any image file NOT listed here is still served (id = filename stem). 'expected_grade' is the dataset ICDR label (0-4) for demo narration only — it is NOT a model output.",
+  "samples": [
+    {
+      "id": "sample-no-dr",
+      "filename": "sample_00_grade0.jpg",
+      "label": "No DR (ICDR 0) — demo",
+      "expected_grade": 0
+    },
+    {
+      "id": "sample-no-dr-b",
+      "filename": "sample_01_grade0.jpg",
+      "label": "No DR (ICDR 0) — demo",
+      "expected_grade": 0
+    },
+    {
+      "id": "sample-mild",
+      "filename": "sample_02_grade1.jpg",
+      "label": "Mild, not referable (ICDR 1) — demo",
+      "expected_grade": 1
+    },
+    {
+      "id": "sample-moderate",
+      "filename": "sample_03_grade2.jpg",
+      "label": "Moderate, referable (ICDR 2) — demo",
+      "expected_grade": 2
+    },
+    {
+      "id": "sample-moderate-b",
+      "filename": "sample_04_grade2.jpg",
+      "label": "Moderate, referable (ICDR 2) — demo",
+      "expected_grade": 2
+    },
+    {
+      "id": "sample-severe",
+      "filename": "sample_05_grade3.jpg",
+      "label": "Severe, referable (ICDR 3) — demo",
+      "expected_grade": 3
+    },
+    {
+      "id": "sample-proliferative",
+      "filename": "sample_06_grade4.jpg",
+      "label": "Proliferative, referable (ICDR 4) — demo",
+      "expected_grade": 4
+    }
+  ]
+}
