@@ -31,3 +31,5 @@ kaggle.json
 # --- OS / logs ---
 .DS_Store
 *.log
+artifacts/
+.claude/
