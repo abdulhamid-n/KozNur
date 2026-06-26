@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KoʻzNur — Zeno · Umummilliy AI Hackathon</title>
+
+<!-- Inter: full Latin + Latin-Extended (Uzbek oʻ gʻ glyphs) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;750&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="css/design-system.css" />
+
+<!-- GSAP from CDN (motion engine) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+        integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+
+<div class="deck-root">
+  <div class="stage" id="stage">
+
+    <!-- ================================================================
+         REFERENCE SLIDE — System architecture (§5)
+         This is the fully-designed slide that sets the visual DNA.
+         Other slides are scaffolded by the build agent reusing these
+         components. Marked data-slide so deck.js can register it.
+         ================================================================ -->
+    <section class="slide is-active" data-slide data-reveal-id="architecture">
+
+      <div class="slide-head" style="margin-bottom: var(--s-6);">
+        <span class="section-kicker"><span class="num">05</span> &nbsp;Tizim arxitekturasi</span>
+        <h2 class="slide-title" data-reveal>
+          Bitta soʻrov, <span class="accent">uch qatlam</span>: rasm kiradi — yoʻnaltirish chiqadi
+        </h2>
+      </div>
+
+      <div class="diagram-frame is-gridded" data-reveal style="padding: var(--s-7) var(--s-7) var(--s-8);">
+        <!-- ------------------------------------------------------------
+             Animated data-flow: React -> FastAPI -> PyTorch/Grad-CAM
+             SVG is the spine (boxes + arrows + flowing packet); HTML
+             node bodies overlay via foreignObject for crisp Uzbek text.
+             ------------------------------------------------------------ -->
+        <svg viewBox="0 0 1040 380" role="img"
+             aria-label="React frontend HTTP FastAPI backend PyTorch Grad-CAM data flow">
+
+          <defs>
+            <!-- Arrowheads -->
+            <marker id="arrowTeal" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#0F838C" />
+            </marker>
+            <marker id="arrowNavy" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#0B3D66" />
+            </marker>
+            <linearGradient id="flowGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"  stop-color="#0F838C" stop-opacity="0" />
+              <stop offset="50%" stop-color="#0F838C" stop-opacity="1" />
+              <stop offset="100%" stop-color="#0F838C" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+
+          <!-- ===== Connector: React -> FastAPI (request, draws on) ===== -->
+          <path class="flow-line" data-flow="1"
+                d="M 318 120 L 392 120"
+                fill="none" stroke="#0F838C" stroke-width="2.5"
+                marker-end="url(#arrowTeal)" />
+          <!-- ===== Connector: FastAPI -> Model ===== -->
+          <path class="flow-line" data-flow="2"
+                d="M 720 120 L 794 120"
+                fill="none" stroke="#0F838C" stroke-width="2.5"
+                marker-end="url(#arrowTeal)" />
+          <!-- ===== Return path: Model -> FastAPI -> React (JSON, navy) ===== -->
+          <path class="flow-line" data-flow="3"
+                d="M 794 168 L 720 168"
+                fill="none" stroke="#0B3D66" stroke-width="2.5"
+                stroke-dasharray="6 5"
+                marker-end="url(#arrowNavy)" />
+          <path class="flow-line" data-flow="4"
+                d="M 392 168 L 318 168"
+                fill="none" stroke="#0B3D66" stroke-width="2.5"
+                stroke-dasharray="6 5"
+                marker-end="url(#arrowNavy)" />
+
+          <!-- Flow-direction labels -->
+          <g font-family="JetBrains Mono, monospace" font-size="12" font-weight="600">
+            <text class="flow-label" data-flow-label="1" x="355" y="108" fill="#0B6B73" text-anchor="middle">HTTP · multipart</text>
+            <text class="flow-label" data-flow-label="3" x="556" y="188" fill="#0B3D66" text-anchor="middle">JSON · grade + Grad-CAM</text>
+          </g>
+
+          <!-- Animated packet that travels the request path on reveal -->
+          <circle class="flow-packet" r="5" fill="#0F838C" opacity="0">
+            <title>fundus image</title>
+          </circle>
+
+          <!-- ===== NODE 1: React frontend ===== -->
+          <foreignObject class="arch-node" data-node="1" x="40" y="58" width="278" height="124">
+            <div xmlns="http://www.w3.org/1999/xhtml" class="node">
+              <div class="node__title">React <span class="tag">Vite · Tailwind</span></div>
+              <ul class="node__list">
+                <li>Fundus rasmni yuklash / tortib tashlash</li>
+                <li>Natija kartasi + Grad-CAM qatlami</li>
+                <li>Namuna galereyasi · yoʻnaltirish matni</li>
+              </ul>
+            </div>
+          </foreignObject>
+
+          <!-- ===== NODE 2: FastAPI backend ===== -->
+          <foreignObject class="arch-node" data-node="2" x="392" y="42" width="328" height="156">
+            <div xmlns="http://www.w3.org/1999/xhtml" class="node">
+              <div class="node__title">FastAPI <span class="tag">Python 3.11</span></div>
+              <ul class="node__list">
+                <li>Old-ishlov: OpenCV / Pillow (krop, resize)</li>
+                <li>PyTorch + torchvision inferens (MPS)</li>
+                <li><span style="color:#0B3D66;font-weight:600">POST /predict</span> · /health · /samples</li>
+              </ul>
+            </div>
+          </foreignObject>
+
+          <!-- ===== NODE 3: Model + Grad-CAM ===== -->
+          <foreignObject class="arch-node" data-node="3" x="794" y="58" width="246" height="124">
+            <div xmlns="http://www.w3.org/1999/xhtml" class="node">
+              <div class="node__title">Model <span class="tag">PyTorch</span></div>
+              <ul class="node__list">
+                <li>EfficientNet · ICDR 0–4 softmax</li>
+                <li>pytorch-grad-cam issiqlik xaritasi</li>
+                <li>referable = grade ≥ 2</li>
+              </ul>
+            </div>
+          </foreignObject>
+
+          <!-- ===== Output strip: the JSON the model returns ===== -->
+          <foreignObject class="arch-out" data-node="out" x="40" y="232" width="1000" height="120">
+            <div xmlns="http://www.w3.org/1999/xhtml"
+                 style="display:flex;gap:16px;align-items:stretch;">
+              <div class="code" style="flex:1;">{
+  <span class="k">"grade"</span>: <span class="n">2</span>, <span class="k">"grade_label"</span>: <span class="s">"Moderate"</span>,
+  <span class="k">"referable"</span>: <span class="b">true</span>,  <span class="k">"confidence"</span>: <span class="n">0.87</span>,
+  <span class="k">"recommendation"</span>: <span class="s">"Mutaxassis koʻrigiga yoʻnaltirilsin"</span>
+}</div>
+              <div class="referable-banner" style="flex:none;width:300px;">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 9v4"/><path d="M12 17h.01"/>
+                  <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>
+                </svg>
+                <span class="label">Yoʻnaltirish tavsiya etiladi</span>
+              </div>
+            </div>
+          </foreignObject>
+        </svg>
+
+        <div class="diagram-frame__caption">ARCHITECTURE.md §5 · server-side inferens</div>
+      </div>
+
+      <div class="row" style="margin-top: var(--s-5); gap: var(--s-5);" data-reveal>
+        <span class="badge is-navy"><span class="dot"></span>Brauzerda inferens yoʻq</span>
+        <span class="badge"><span class="dot"></span>Grad-CAM serverda</span>
+        <span class="citation"><span class="src">Stack:</span>&nbsp;React ↔ FastAPI ↔ PyTorch — kontrakt §5</span>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         SCAFFOLD PLACEHOLDER SLIDES
+         Minimal stubs so navigation, counter and progress work end-to-end.
+         The build agent replaces each <section data-slide> body with full
+         content, reusing the component vocabulary above.
+         ================================================================ -->
+    <section class="slide" data-slide data-reveal-id="placeholder">
+      <div class="slide-head">
+        <span class="section-kicker"><span class="num">··</span> &nbsp;Skelet sahifa</span>
+        <h2 class="slide-title" data-reveal>Bu yer build agent uchun <span class="accent">boʻsh ramka</span></h2>
+        <p class="lead" data-reveal>
+          Komponent lugʻati: <span class="mono">.slide-title · .big-stat · .stat-card · .diagram-frame · .citation · .quote · .two-col</span>.
+          Har bir slayd shu sinflardan quriladi.
+        </p>
+        <div class="grid" style="margin-top: var(--s-6);">
+          <div class="col-4" data-reveal>
+            <div class="stat-card is-navy">
+              <div class="stat-card__head">Reusable</div>
+              <div class="stat-card__value" data-count="12" data-count-suffix="">0</div>
+              <div class="stat-card__label">slayd · ~12–14 (kontrakt §7)</div>
+            </div>
+          </div>
+          <div class="col-4" data-reveal>
+            <div class="stat-card">
+              <div class="stat-card__head">Tilshunoslik</div>
+              <div class="stat-card__value">Oʻzbek</div>
+              <div class="stat-card__label">Latin · texnik atamalar EN</div>
+            </div>
+          </div>
+          <div class="col-4" data-reveal>
+            <div class="stat-card is-referable">
+              <div class="stat-card__head">Accent</div>
+              <div class="stat-card__value">referable</div>
+              <div class="stat-card__label">faqat grade ≥ 2 uchun warm rang</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /.stage -->
+
+  <!-- ====================== DECK FURNITURE (shell chrome) ================ -->
+  <!-- Slide progress indicator -->
+  <div class="deck-progress" id="deckProgress" aria-hidden="true">
+    <span class="deck-progress__bar" id="deckProgressBar"></span>
+  </div>
+
+  <!-- Footer brand line -->
+  <div class="deck-footer">
+    <span class="deck-footer__brand">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="#0F838C" stroke-width="2"/>
+        <circle cx="12" cy="12" r="3.4" fill="#0B3D66"/>
+      </svg>
+      Zeno · KoʻzNur
+    </span>
+  </div>
+
+  <!-- Slide counter -->
+  <div class="deck-counter" id="deckCounter">
+    <span id="deckCurrent" class="tnum">1</span>
+    <span class="deck-counter__sep">/</span>
+    <span id="deckTotal" class="tnum">2</span>
+  </div>
+
+  <!-- Prev / next controls -->
+  <div class="deck-nav">
+    <button class="deck-nav__btn" id="deckPrev" aria-label="Oldingi slayd">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button class="deck-nav__btn" id="deckNext" aria-label="Keyingi slayd">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Shell-chrome styles kept inline so the shell is one portable file -->
+<style>
+  .deck-progress {
+    position: fixed; top: 0; left: 0; right: 0; height: 3px;
+    background: transparent; z-index: 50;
+  }
+  .deck-progress__bar {
+    display: block; height: 100%; width: 0;
+    background: linear-gradient(90deg, var(--navy), var(--teal));
+    transition: width 0.5s var(--ease-out);
+  }
+  .deck-footer {
+    position: fixed; left: 28px; bottom: 22px; z-index: 40;
+  }
+  .deck-footer__brand {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em;
+    color: var(--muted); font-family: var(--font-sans);
+  }
+  .deck-counter {
+    position: fixed; right: 28px; bottom: 22px; z-index: 40;
+    font-family: var(--font-mono); font-size: 0.82rem; font-weight: 500;
+    color: var(--muted); letter-spacing: 0.04em;
+  }
+  .deck-counter #deckCurrent { color: var(--navy); font-weight: 600; }
+  .deck-counter__sep { margin: 0 4px; color: var(--line-strong); }
+  .deck-nav {
+    position: fixed; right: 28px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 10px; z-index: 40;
+  }
+  .deck-nav__btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid var(--line); background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(6px);
+    color: var(--navy); cursor: pointer;
+    display: grid; place-items: center;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.18s var(--ease-out), background 0.18s, border-color 0.18s, opacity 0.18s;
+  }
+  .deck-nav__btn:hover { background: #fff; border-color: var(--teal-300); transform: translateY(-1px); }
+  .deck-nav__btn:active { transform: translateY(0) scale(0.96); }
+  .deck-nav__btn[disabled] { opacity: 0.35; cursor: default; pointer-events: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .deck-progress__bar { transition: none; }
+    .deck-nav__btn { transition: none; }
+  }
+</style>
+
+<script src="js/deck.js"></script>
+</body>
+</html>

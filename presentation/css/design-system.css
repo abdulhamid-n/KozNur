@@ -1,0 +1,443 @@
+/* ============================================================================
+   KoʻzNur — Design System
+   Zeno · Umummilliy AI Hackathon, Guliston 2026
+   Medical-clean, journal-grade. Navy + teal + warm referable accent.
+   This file is the single source of visual truth for the deck.
+   ============================================================================ */
+
+/* ---------------------------------------------------------------- 1. TOKENS */
+:root {
+  /* --- Brand palette (locked by ARCHITECTURE.md §7) --- */
+  --navy:        #0B3D66;   /* primary brand, headings, structure */
+  --teal:        #0F838C;   /* secondary brand, accents, links, flow */
+  --bg:          #F7FAFC;   /* light page background */
+  --ink:         #0E1B2A;   /* near-black body text */
+  --referable:   #E8833A;   /* WARM ALERT — ONLY for "referable" / grade >= 2 */
+
+  /* --- Derived / supporting neutrals (cool, journal-grade) --- */
+  --navy-700:    #0A3357;
+  --navy-300:    #3E6A93;
+  --navy-100:    #D7E3EE;
+  --teal-700:    #0B6B73;
+  --teal-300:    #5FB0B6;
+  --teal-50:     #E7F2F3;
+  --referable-50:#FCEFE3;
+  --referable-700:#C66523;
+
+  --surface:     #FFFFFF;   /* card surfaces sit above --bg */
+  --surface-2:   #EEF3F8;   /* subtle inset panels */
+  --line:        #DCE6EF;   /* hairlines, grid, dividers */
+  --line-strong: #C4D3E1;
+  --muted:       #5B6B7B;   /* secondary text */
+  --muted-2:     #8595A4;   /* tertiary / captions */
+
+  /* --- Status (non-referable grades stay cool & calm) --- */
+  --ok:          #1F8A5B;   /* No DR / negative — calm green */
+  --ok-50:       #E6F4EC;
+  --watch:       #B8932A;   /* mild — muted amber, NOT the referable orange */
+
+  /* --- Typography --- */
+  --font-sans: "Inter", "Inter var", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, "Cascadia Code",
+               Menlo, Consolas, monospace;
+
+  /* Type scale — modular, ratio ~1.25, expressed in cqw of the slide so it
+     scales with the 1280x720 stage. 1rem here = 16px at full size. */
+  --fs-kicker:   0.78rem;
+  --fs-caption:  0.82rem;
+  --fs-body-sm:  0.95rem;
+  --fs-body:     1.08rem;
+  --fs-lead:     1.35rem;
+  --fs-h3:       1.55rem;
+  --fs-h2:       2.15rem;
+  --fs-title:    3.4rem;
+  --fs-stat:     4.6rem;
+  --fs-stat-xl:  6.2rem;
+
+  --lh-tight:    1.08;
+  --lh-snug:     1.28;
+  --lh-body:     1.55;
+
+  --tracking-kicker: 0.16em;
+  --tracking-tight:  -0.02em;
+  --tracking-stat:   -0.03em;
+
+  /* --- Spacing scale (8pt base) --- */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+  --s-9: 80px; --s-10: 112px;
+
+  /* --- Radii --- */
+  --r-sm: 6px; --r-md: 10px; --r-lg: 16px; --r-xl: 22px; --r-pill: 999px;
+
+  /* --- Elevation (soft, clinical — no heavy drop shadows) --- */
+  --shadow-sm: 0 1px 2px rgba(11,61,102,0.06), 0 1px 1px rgba(11,61,102,0.04);
+  --shadow-md: 0 6px 18px rgba(11,61,102,0.08), 0 2px 6px rgba(11,61,102,0.05);
+  --shadow-lg: 0 18px 44px rgba(11,61,102,0.12), 0 6px 14px rgba(11,61,102,0.06);
+
+  /* --- Stage geometry --- */
+  --stage-w: 1280px;
+  --stage-h: 720px;
+  --pad-x:   var(--s-10);
+  --pad-y:   var(--s-8);
+
+  /* --- Motion --- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ----------------------------------------------------------- 2. BASE RESET */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01" 1, "cv01" 1, "tnum" 0;
+  overflow: hidden;
+}
+h1, h2, h3, p { margin: 0; }
+strong { font-weight: 650; color: var(--navy); }
+em { font-style: normal; color: var(--teal-700); font-weight: 600; }
+
+/* --------------------------------------------------- 3. STAGE / SCALING */
+/* The deck shell positions .stage; deck.js scales it to fit the window so the
+   16:9 canvas is pixel-stable. All slide internals are authored at 1280x720. */
+.deck-root {
+  position: fixed; inset: 0;
+  display: grid; place-items: center;
+  background:
+    radial-gradient(120% 90% at 50% -10%, #FFFFFF 0%, var(--bg) 55%, #EEF3F8 100%);
+}
+.stage {
+  position: relative;
+  width: var(--stage-w);
+  height: var(--stage-h);
+  transform-origin: center center;
+  container-type: size;
+  container-name: stage;
+}
+
+/* ------------------------------------------------------------- 4. SLIDES */
+.slide {
+  position: absolute; inset: 0;
+  padding: var(--pad-y) var(--pad-x);
+  display: none;
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.slide.is-active { display: block; }
+/* Hairline frame ties every slide to the brand without heaviness */
+.slide::after {
+  content: ""; position: absolute; inset: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  pointer-events: none;
+}
+/* Thin brand rule along the top edge */
+.slide::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--navy) 0%, var(--teal) 70%, var(--teal-300) 100%);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+}
+
+/* Slide furniture (footer, counter, progress) live in the shell, see index.html */
+
+/* ----------------------------------------------------- 5. 12-COL GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--s-5);
+  row-gap: var(--s-5);
+}
+.col-1{grid-column:span 1}.col-2{grid-column:span 2}.col-3{grid-column:span 3}
+.col-4{grid-column:span 4}.col-5{grid-column:span 5}.col-6{grid-column:span 6}
+.col-7{grid-column:span 7}.col-8{grid-column:span 8}.col-9{grid-column:span 9}
+.col-10{grid-column:span 10}.col-11{grid-column:span 11}.col-12{grid-column:span 12}
+.start-2{grid-column-start:2}.start-3{grid-column-start:3}.start-7{grid-column-start:7}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-7);
+  align-items: start;
+}
+.two-col.is-asym { grid-template-columns: 1.15fr 0.85fr; }
+.stack { display: flex; flex-direction: column; gap: var(--s-4); }
+.stack-lg { display: flex; flex-direction: column; gap: var(--s-6); }
+.row { display: flex; gap: var(--s-4); align-items: center; }
+.fill { flex: 1; }
+
+/* ------------------------------------------------- 6. TYPE COMPONENTS */
+.section-kicker {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  font-size: var(--fs-kicker);
+  font-weight: 600;
+  letter-spacing: var(--tracking-kicker);
+  text-transform: uppercase;
+  color: var(--teal-700);
+}
+.section-kicker::before {
+  content: ""; width: 22px; height: 2px; background: var(--teal);
+  display: inline-block; border-radius: 2px;
+}
+.section-kicker .num {
+  font-variant-numeric: tabular-nums; color: var(--muted-2);
+  font-weight: 600; letter-spacing: 0.04em;
+}
+
+.slide-title {
+  font-size: var(--fs-title);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--navy);
+  max-width: 18ch;
+}
+.slide-title .accent { color: var(--teal); }
+
+h2.heading, .heading {
+  font-size: var(--fs-h2); font-weight: 700; line-height: var(--lh-snug);
+  letter-spacing: var(--tracking-tight); color: var(--navy);
+}
+h3.subheading, .subheading {
+  font-size: var(--fs-h3); font-weight: 650; line-height: var(--lh-snug);
+  color: var(--navy-700);
+}
+.lead {
+  font-size: var(--fs-lead); line-height: var(--lh-snug);
+  color: var(--ink); font-weight: 400; max-width: 32ch;
+}
+.body { font-size: var(--fs-body); line-height: var(--lh-body); color: var(--ink); max-width: 56ch; }
+.body-sm { font-size: var(--fs-body-sm); line-height: var(--lh-body); color: var(--muted); }
+.caption { font-size: var(--fs-caption); line-height: var(--lh-snug); color: var(--muted-2); }
+
+/* ------------------------------------------------------ 7. BIG STAT */
+.big-stat { display: flex; flex-direction: column; gap: var(--s-2); }
+.big-stat .value {
+  font-size: var(--fs-stat);
+  font-weight: 750;
+  line-height: 0.95;
+  letter-spacing: var(--tracking-stat);
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
+  display: flex; align-items: baseline; gap: 0.12em;
+}
+.big-stat.is-xl .value { font-size: var(--fs-stat-xl); }
+.big-stat .value .unit {
+  font-size: 0.42em; font-weight: 650; color: var(--teal); letter-spacing: 0;
+}
+.big-stat .label {
+  font-size: var(--fs-body-sm); color: var(--muted);
+  line-height: var(--lh-snug); max-width: 24ch;
+}
+.big-stat.is-referable .value { color: var(--referable); }
+
+/* ------------------------------------------------------ 8. STAT CARD */
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--s-5) var(--s-5) var(--s-5) var(--s-6);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  display: flex; flex-direction: column; gap: var(--s-3);
+  overflow: hidden;
+}
+/* Left accent spine — teal by default, navy / referable variants */
+.stat-card::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--teal);
+}
+.stat-card.is-navy::before { background: var(--navy); }
+.stat-card.is-referable::before { background: var(--referable); }
+.stat-card.is-referable { background: var(--referable-50); border-color: #F1D2B8; }
+.stat-card .stat-card__value {
+  font-size: var(--fs-h2); font-weight: 750; color: var(--navy);
+  letter-spacing: var(--tracking-tight); font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.stat-card.is-referable .stat-card__value { color: var(--referable-700); }
+.stat-card .stat-card__label { font-size: var(--fs-body-sm); color: var(--muted); }
+.stat-card .stat-card__head {
+  display: flex; align-items: center; gap: var(--s-3);
+  font-size: var(--fs-kicker); letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--teal-700); font-weight: 600;
+}
+.stat-card .stat-card__icon { width: 22px; height: 22px; color: var(--teal); flex: none; }
+.stat-card.is-navy .stat-card__icon, .stat-card.is-navy .stat-card__head { color: var(--navy); }
+.stat-card.is-referable .stat-card__icon, .stat-card.is-referable .stat-card__head { color: var(--referable-700); }
+
+/* ------------------------------------------------ 9. DIAGRAM FRAME */
+.diagram-frame {
+  background:
+    linear-gradient(180deg, #FBFDFE 0%, var(--surface-2) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--s-6);
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+/* faint engineering grid behind diagrams */
+.diagram-frame.is-gridded {
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+}
+.diagram-frame__caption {
+  position: absolute; bottom: var(--s-3); right: var(--s-5);
+  font-size: var(--fs-caption); color: var(--muted-2);
+  font-family: var(--font-mono); letter-spacing: 0.02em;
+}
+.diagram-frame svg { display: block; width: 100%; height: auto; }
+
+/* ----------------------------------------------------- 10. CITATION */
+.citation {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  font-size: var(--fs-caption);
+  color: var(--muted);
+  border-left: 2px solid var(--teal-300);
+  padding-left: var(--s-3);
+  line-height: var(--lh-snug);
+  font-style: normal;
+}
+.citation .src { font-weight: 600; color: var(--navy-300); }
+.citation a { color: var(--teal-700); text-decoration: none; }
+
+/* --------------------------------------------------------- 11. QUOTE */
+.quote {
+  font-size: var(--fs-lead);
+  line-height: var(--lh-snug);
+  color: var(--navy);
+  font-weight: 500;
+  padding-left: var(--s-6);
+  position: relative;
+  max-width: 30ch;
+}
+.quote::before {
+  content: "“"; position: absolute; left: -0.05em; top: -0.18em;
+  font-size: 2.6em; line-height: 1; color: var(--teal-300);
+  font-family: Georgia, "Times New Roman", serif;
+}
+.quote__cite {
+  display: block; margin-top: var(--s-4);
+  font-size: var(--fs-caption); color: var(--muted);
+  font-weight: 600; letter-spacing: 0.02em;
+}
+
+/* ------------------------------------------------------- 12. BADGES */
+.badge {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-1) var(--s-3);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-caption); font-weight: 600; letter-spacing: 0.01em;
+  background: var(--teal-50); color: var(--teal-700);
+  border: 1px solid #CFE4E5;
+}
+.badge.is-navy   { background: var(--navy-100); color: var(--navy); border-color: #C2D5E6; }
+.badge.is-ok     { background: var(--ok-50); color: var(--ok); border-color: #C5E4D2; }
+.badge.is-referable {
+  background: var(--referable-50); color: var(--referable-700);
+  border-color: #F1D2B8;
+}
+.badge .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+/* Referable banner — the one warm-accent hero element, used sparingly */
+.referable-banner {
+  display: flex; align-items: center; gap: var(--s-4);
+  background: var(--referable-50);
+  border: 1px solid #F1D2B8;
+  border-left: 4px solid var(--referable);
+  border-radius: var(--r-md);
+  padding: var(--s-4) var(--s-5);
+  color: var(--referable-700);
+}
+.referable-banner .label { font-weight: 650; font-size: var(--fs-body); }
+
+/* --------------------------------------------- 13. ICDR GRADE PILLS */
+.grade-pills { display: flex; gap: var(--s-2); }
+.grade-pill {
+  flex: 1; text-align: center;
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-2);
+  background: var(--surface);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.grade-pill .g { font-size: var(--fs-body); font-weight: 750; color: var(--navy); }
+.grade-pill .n { font-size: var(--fs-caption); color: var(--muted); }
+.grade-pill.is-referable { background: var(--referable-50); border-color: #F1D2B8; }
+.grade-pill.is-referable .g { color: var(--referable-700); }
+.grade-pill.is-ok { background: var(--ok-50); border-color: #C5E4D2; }
+.grade-pill.is-ok .g { color: var(--ok); }
+
+/* ----------------------------------------- 14. CODE / JSON SNIPPET */
+.code {
+  font-family: var(--font-mono); font-size: 0.86rem; line-height: 1.6;
+  background: var(--ink); color: #D7E3EE;
+  border-radius: var(--r-md); padding: var(--s-5);
+  border: 1px solid #16263A;
+  overflow: hidden; white-space: pre;
+}
+.code .k { color: #6FC7CE; }   /* keys / teal */
+.code .s { color: #E8B98A; }   /* strings */
+.code .b { color: #E8833A; }   /* boolean / referable accent */
+.code .n { color: #9FD3A0; }   /* numbers */
+.code .c { color: #5B6B7B; }   /* comment */
+
+/* ------------------------------------------------ 15. DATA-FLOW NODE */
+/* Reusable styling hooks for the architecture SVG node labels rendered in HTML */
+.node {
+  background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: var(--r-md); box-shadow: var(--shadow-sm);
+  padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-2);
+}
+.node__title { font-weight: 700; color: var(--navy); font-size: var(--fs-body); }
+.node__title .tag {
+  font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600;
+  color: var(--teal-700); background: var(--teal-50);
+  padding: 1px 6px; border-radius: var(--r-sm); margin-left: 6px;
+}
+.node__list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.node__list li {
+  font-size: var(--fs-body-sm); color: var(--muted);
+  padding-left: var(--s-4); position: relative;
+}
+.node__list li::before {
+  content: ""; position: absolute; left: 0; top: 0.55em;
+  width: 6px; height: 6px; border-radius: 1px; background: var(--teal-300);
+}
+
+/* ------------------------------------------------------ 16. UTILITIES */
+.divider { height: 1px; background: var(--line); border: 0; margin: var(--s-4) 0; }
+.divider-v { width: 1px; align-self: stretch; background: var(--line); }
+.spacer-1{height:var(--s-2)}.spacer-2{height:var(--s-4)}
+.spacer-3{height:var(--s-6)}.spacer-4{height:var(--s-8)}
+.mono { font-family: var(--font-mono); }
+.tnum { font-variant-numeric: tabular-nums; }
+.text-navy{color:var(--navy)}.text-teal{color:var(--teal-700)}
+.text-muted{color:var(--muted)}.text-referable{color:var(--referable-700)}
+.eyebrow-rule { width: 56px; height: 3px; background: var(--teal); border-radius: 3px; }
+
+/* slide-title block convenience: kicker + title + lead grouped */
+.slide-head { display: flex; flex-direction: column; gap: var(--s-4); }
+
+/* ------------------------------- 17. REVEAL / MOTION INITIAL STATES */
+/* deck.js animates these in; CSS sets the resting (pre-reveal) state only when
+   motion is allowed. With reduced-motion, everything is visible immediately. */
+@media (prefers-reduced-motion: no-preference) {
+  .slide.is-active[data-revealing] [data-reveal] { opacity: 0; }
+}
+.draw-on { stroke-dasharray: 1; stroke-dashoffset: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1 !important; transform: none !important; }
+  .draw-on { stroke-dashoffset: 0 !important; }
+  * { scroll-behavior: auto !important; }
+}
