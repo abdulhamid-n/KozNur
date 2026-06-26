@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-mist text-ink font-sans antialiased;
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  /* Subtle calm clinical background wash */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(900px 420px at 88% -8%, rgba(15, 131, 140, 0.07), transparent 60%),
+      radial-gradient(820px 420px at -6% 4%, rgba(11, 61, 102, 0.06), transparent 55%);
+    pointer-events: none;
+  }
+}
+
+@layer components {
+  .skeleton {
+    background-image: linear-gradient(
+      90deg,
+      rgba(11, 61, 102, 0.06) 0px,
+      rgba(11, 61, 102, 0.12) 40px,
+      rgba(11, 61, 102, 0.06) 80px
+    );
+    background-size: 800px 100%;
+    @apply animate-shimmer rounded-md;
+  }
+}
+
+/* Custom scrollbar — quiet and clinical */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(11, 61, 102, 0.18);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(11, 61, 102, 0.3);
+}
