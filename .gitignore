@@ -1,0 +1,33 @@
+# --- Data: APTOS 2019 images (Kaggle competition rules prohibit redistribution) + large ---
+data/
+backend/samples/*.jpg
+backend/samples/*.jpeg
+backend/samples/*.png
+
+# --- Model weights (large binaries) ---
+*.pt
+*.pth
+*.onnx
+backend/models/
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# --- Node / build output ---
+node_modules/
+frontend/dist/
+
+# --- Secrets / local ---
+.kaggle/
+kaggle.json
+*.local
+
+# --- OS / logs ---
+.DS_Store
+*.log
