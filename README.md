@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- Brendlar: display "Space Grotesk", data/raqamlar "JetBrains Mono", body "Inter" -->
-<a href="https://fonts.google.com"><img src="https://img.shields.io/badge/-Space%20Grotesk%20%C2%B7%20JetBrains%20Mono%20%C2%B7%20Inter-0E1A24?style=flat-square&labelColor=0E1A24" alt="fonts"></a>
+<a href="https://fonts.google.com"><img src="https://img.shields.io/badge/-Space%20Grotesk%20%C2%B7%20JetBrains%20Mono%20%C2%B7%20Inter-0E1A24?style=flat-square&labelColor=0A1733" alt="fonts"></a>
 
 # KoʻzNur
 
@@ -12,11 +12,17 @@ Triage — _tashxis emas_. Yakuniy qarorni har doim oftalmolog qabul qiladi.
 
 <br/>
 
-![Python](https://img.shields.io/badge/Python-3.11+-0F838C?style=flat-square&labelColor=0E1A24&logo=python&logoColor=0FB5BA)
-![React](https://img.shields.io/badge/React-18%20%C2%B7%20Vite-0F838C?style=flat-square&labelColor=0E1A24&logo=react&logoColor=0FB5BA)
-![FastAPI](https://img.shields.io/badge/FastAPI-async-0F838C?style=flat-square&labelColor=0E1A24&logo=fastapi&logoColor=0FB5BA)
-![PyTorch](https://img.shields.io/badge/PyTorch-MPS-0F838C?style=flat-square&labelColor=0E1A24&logo=pytorch&logoColor=0FB5BA)
-![QWK](https://img.shields.io/badge/QWK-~0.92-1F9D74?style=flat-square&labelColor=0E1A24)
+![Python](https://img.shields.io/badge/Python-3.11+-1D4ED8?style=flat-square&labelColor=0A1733&logo=python&logoColor=3B82F6)
+![React](https://img.shields.io/badge/React-18%20%C2%B7%20Vite-1D4ED8?style=flat-square&labelColor=0A1733&logo=react&logoColor=3B82F6)
+![FastAPI](https://img.shields.io/badge/FastAPI-async-1D4ED8?style=flat-square&labelColor=0A1733&logo=fastapi&logoColor=3B82F6)
+![PyTorch](https://img.shields.io/badge/PyTorch-MPS-1D4ED8?style=flat-square&labelColor=0A1733&logo=pytorch&logoColor=3B82F6)
+![QWK](https://img.shields.io/badge/QWK-~0.92-1F9D74?style=flat-square&labelColor=0A1733)
+
+<br/>
+
+[![Jonli Demo](https://img.shields.io/badge/%E2%96%B6%20JONLI%20DEMO-3B82F6?style=for-the-badge&labelColor=0A1733)](https://detected-responses-bridal-complex.trycloudflare.com)
+
+<sub>Vaqtinchalik Cloudflare tunnel — taqdimot davomida faol. Lokal ishga tushirish boʻyicha pastga qarang.</sub>
 
 <br/>
 
