@@ -463,34 +463,33 @@ ul.clean li small{color:var(--muted)}
 <section class="slide light" data-ctx="light">
   <div class="stage">
     <div class="grid-bg"></div>
-    <div class="eyebrow"><span class="tick"></span><span class="ml lbl">SOHA QANDAY HAL QILGAN</span><span class="ml num">/ 08</span></div>
-    <h2 class="head">Tasdiqlangan retsept — biz uni takrorlaymiz</h2>
+    <div class="eyebrow"><span class="tick"></span><span class="ml lbl">BIZNING YONDASHUVIMIZ</span><span class="ml num">/ 08</span></div>
+    <h2 class="head">Klinik-grade skriningni qanday quramiz</h2>
     <div class="content" style="padding-top:18px">
       <div style="display:grid;grid-template-columns:.92fr 1.08fr;gap:46px;align-items:start">
         <div>
+          <div class="ml" style="color:var(--muted);margin-bottom:12px">ILMIY ASOS</div>
           <div class="card" style="margin-bottom:14px">
             <div class="ml" style="color:var(--teal-d);margin-bottom:8px">GULSHAN ET AL. · JAMA 2016</div>
-            <p class="note" style="color:var(--ink);font-size:13px">Chuqur CNN (Inception-v3), <b>~128,000</b> baholangan fundus tasviri. Referable-DR <b>AUC ≈ 0.991</b>, sezgirlik/oʻziga xoslik ~90% / 98%.</p>
+            <p class="note" style="color:var(--ink);font-size:13px">Chuqur CNN, <b>~128,000</b> baholangan fundus tasviri ustida. Referable-DR <b>AUC ≈ 0.991</b> — oftalmolog darajasidagi sezgirlik/oʻziga xoslik (~90% / 98%).</p>
           </div>
           <div class="card">
             <div class="ml" style="color:var(--teal-d);margin-bottom:8px">GOOGLE ARDA</div>
-            <p class="note" style="color:var(--ink);font-size:13px">Tailand va Hindiston klinikalarida <b>prospektiv validatsiya</b> qilingan productized variant.</p>
+            <p class="note" style="color:var(--ink);font-size:13px">Tailand va Hindiston klinikalarida <b>prospektiv validatsiya</b> — avtomatik DR skrining haqiqiy bemorlarda ishlashini tasdiqlaydi.</p>
           </div>
-          <p class="note" style="margin-top:14px">APTOS 2019 yetakchi yechimlari xususiy reytingda <b style="color:var(--ink)">QWK ≈ 0.93</b>.</p>
+          <p class="note" style="margin-top:14px">Demak skrining AI klinik jihatdan isbotlangan. Biz buni hamyonbop, izohlanadigan <b style="color:var(--ink)">triage vositasiga</b> aylantiramiz.</p>
         </div>
         <div>
-          <div class="ml" style="color:var(--muted);margin-bottom:6px">APTOS-2019 GʻOLIB RICHAGLARI · TAʼSIR BOʻYICHA</div>
-          <div class="lever"><span class="lrank">1</span><div class="lname">2015 (EyePACS) pretraining<small>~88k tasvir — eng katta yagona ball richagi</small></div><div class="lbar"><span class="lfill" data-w="100%"></span></div></div>
-          <div class="lever"><span class="lrank">2</span><div class="lname">Regression head + threshold rounding<small>klassifikatsiya emas — tartibli darajalarga mos</small></div><div class="lbar"><span class="lfill" data-w="84%"></span></div></div>
-          <div class="lever"><span class="lrank">3</span><div class="lname">Model ansambllari<small>bir nechta foldlar oʻrtachasi</small></div><div class="lbar"><span class="lfill" data-w="72%"></span></div></div>
-          <div class="lever"><span class="lrank">4</span><div class="lname">Ben-Graham preprocessing<small>scale-radius crop + kontrast normallash</small></div><div class="lbar"><span class="lfill" data-w="64%"></span></div></div>
-          <div class="lever"><span class="lrank">5</span><div class="lname">Yuqori rezolyutsiya<small>256–456 px kirish</small></div><div class="lbar"><span class="lfill" data-w="54%"></span></div></div>
-          <div class="lever"><span class="lrank">6</span><div class="lname">Iterativ pseudo-labeling<small>belgilanmagan tasvirlardan qoʻshimcha signal</small></div><div class="lbar"><span class="lfill" data-w="46%"></span></div></div>
+          <div class="ml" style="color:var(--muted);margin-bottom:6px">BIZNING TIZIM · ASOSIY QARORLAR</div>
+          <div class="lever"><span class="lrank">01</span><div class="lname">SE-ResNeXt50 + regressiya boshi<small>ICDR 0–4 ni tartibli (ordinal) baholaydi — oddiy klassifikatsiya emas</small></div><span class="pcode">ordinal</span></div>
+          <div class="lever"><span class="lrank">02</span><div class="lname">Ben-Graham normallash<small>fundus diskini markazlash + yorugʻlik/kontrast tenglash — turli kameralarda barqaror</small></div><span class="pcode">preprocess</span></div>
+          <div class="lever"><span class="lrank">03</span><div class="lname">Grad-CAM izohlash<small>model qaysi hududga qaraganini koʻrsatadi — shifokor uchun shaffoflik</small></div><span class="pcode">XAI</span></div>
+          <div class="lever"><span class="lrank">04</span><div class="lname">Referable ostona (≥ 2)<small>natija — yoʻnaltirish qarori, diagnoz emas; xavfsiz triage ramkasi</small></div><span class="pcode">triage</span></div>
         </div>
       </div>
     </div>
   </div>
-  <div class="foot"><span>TEAM <b class="dot">ZENO</b> · KOʻZNUR</span><span>PRIOR ART</span></div>
+  <div class="foot"><span>TEAM <b class="dot">ZENO</b> · KOʻZNUR</span><span>TEXNIK QARORLAR</span></div>
 </section>
 
 <!-- ========== 9 · PERFORMANCE ========== -->
