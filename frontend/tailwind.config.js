@@ -4,13 +4,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Deep graphite shell — the instrument chassis + dark viewing stage.
+        // Deep navy shell — the "Monolith" chassis + dark viewing stage.
         shell: {
-          900: '#0E1A24', // deepest stage
-          800: '#16242E', // panel chassis
-          700: '#1E303B', // raised surface
-          600: '#2A3D49', // hairline-on-dark / control face
-          500: '#3A4E5A', // muted text on dark
+          900: '#0A1733', // deepest navy stage
+          800: '#0E1F45', // panel chassis
+          700: '#15294E', // raised surface
+          600: '#22386B', // hairline-on-dark / control face
+          500: '#3C5488', // muted text on dark
         },
         // Near-white examination surfaces — the readout side.
         exam: {
@@ -20,11 +20,11 @@ export default {
           200: '#DFE6E8', // hairline rule
           300: '#C7D1D4', // strong rule
         },
-        // ONE precise instrument accent — clinical cyan-teal.
+        // ONE precise instrument accent — electric clinical blue.
         instrument: {
-          DEFAULT: '#0FB5BA',
-          bright: '#0FB5BA',
-          deep: '#0F838C',
+          DEFAULT: '#3B82F6',
+          bright: '#5B9BFF',
+          deep: '#1D4ED8',
         },
         // Grade ramp 0->4: green -> lime -> amber -> orange -> clinical red.
         grade: {
@@ -38,10 +38,10 @@ export default {
         alert: '#E8833A',
         // Ink scale for type on light surfaces.
         ink: {
-          DEFAULT: '#0E1A24',
-          70: 'rgba(14, 26, 36, 0.70)',
-          55: 'rgba(14, 26, 36, 0.55)',
-          40: 'rgba(14, 26, 36, 0.40)',
+          DEFAULT: '#0B1B3A',
+          70: 'rgba(11, 27, 58, 0.70)',
+          55: 'rgba(11, 27, 58, 0.55)',
+          40: 'rgba(11, 27, 58, 0.40)',
         },
       },
       fontFamily: {

@@ -39,7 +39,7 @@ export default function SampleGallery({
           {samples.map((s) => {
             const gi = s.grade != null ? gradeInfo(s.grade) : null
             const isActive = activeId === s.id
-            const color = s.grade != null ? gradeColor(s.grade) : '#0F838C'
+            const color = s.grade != null ? gradeColor(s.grade) : '#1D4ED8'
             return (
               <button
                 key={s.id}

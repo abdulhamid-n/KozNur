@@ -3,7 +3,7 @@
 
 export function LogoMark({ size = 34, className = '', tone = 'light' }) {
   // tone="light" -> for dark backgrounds (header on shell)
-  const ring = tone === 'light' ? '#0FB5BA' : '#0F838C'
+  const ring = tone === 'light' ? '#3B82F6' : '#1D4ED8'
   const tick = tone === 'light' ? 'rgba(255,255,255,0.55)' : 'rgba(14,26,36,0.45)'
   const core = tone === 'light' ? '#F6F8F9' : '#0E1A24'
   return (

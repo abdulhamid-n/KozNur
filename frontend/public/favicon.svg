@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <rect width="64" height="64" rx="14" fill="#0E1A24" />
-  <circle cx="32" cy="32" r="22" stroke="#0FB5BA" stroke-width="2.5" opacity="0.9" />
+  <circle cx="32" cy="32" r="22" stroke="#3B82F6" stroke-width="2.5" opacity="0.9" />
   <g stroke="rgba(255,255,255,0.5)" stroke-width="2.4" stroke-linecap="round">
     <path d="M32 6v6" />
     <path d="M32 52v6" />
     <path d="M6 32h6" />
     <path d="M52 32h6" />
   </g>
-  <circle cx="32" cy="32" r="11" stroke="#0FB5BA" stroke-width="3" />
-  <circle cx="32" cy="32" r="5" fill="#0FB5BA" />
+  <circle cx="32" cy="32" r="11" stroke="#3B82F6" stroke-width="3" />
+  <circle cx="32" cy="32" r="5" fill="#3B82F6" />
   <circle cx="32" cy="32" r="1.8" fill="#0E1A24" />
 </svg>

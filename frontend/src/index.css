@@ -5,8 +5,8 @@
 @layer base {
   :root {
     color-scheme: light;
-    --hairline: rgba(14, 26, 36, 0.12);
-    --hairline-strong: rgba(14, 26, 36, 0.18);
+    --hairline: rgba(11, 27, 58, 0.12);
+    --hairline-strong: rgba(11, 27, 58, 0.18);
     --hairline-dark: rgba(255, 255, 255, 0.08);
   }
 
@@ -23,8 +23,8 @@
     /* Faint engineering grid across the whole console — reads as instrument bench. */
     background-color: #eef2f3;
     background-image:
-      linear-gradient(to right, rgba(14, 26, 36, 0.035) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(14, 26, 36, 0.035) 1px, transparent 1px);
+      linear-gradient(to right, rgba(11, 27, 58, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(11, 27, 58, 0.035) 1px, transparent 1px);
     background-size: 38px 38px;
   }
 
@@ -100,11 +100,11 @@
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(14, 26, 36, 0.18);
+  background: rgba(11, 27, 58, 0.18);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(14, 26, 36, 0.3);
+  background: rgba(11, 27, 58, 0.3);
 }
 
 /* Range input — opacity slider styled as an instrument control */
@@ -123,21 +123,21 @@ input[type='range'].instrument-slider::-webkit-slider-thumb {
   width: 14px;
   height: 14px;
   border-radius: 999px;
-  background: #0fb5ba;
-  border: 2px solid #0e1a24;
-  box-shadow: 0 0 0 1px rgba(15, 181, 186, 0.5);
+  background: #3B82F6;
+  border: 2px solid #0A1733;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5);
   cursor: pointer;
 }
 input[type='range'].instrument-slider::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 999px;
-  background: #0fb5ba;
-  border: 2px solid #0e1a24;
+  background: #3B82F6;
+  border: 2px solid #0A1733;
   cursor: pointer;
 }
 input[type='range'].instrument-slider:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 3px rgba(15, 181, 186, 0.4);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
 }
 
 /* Reduced motion — kill all purposeful animation. */

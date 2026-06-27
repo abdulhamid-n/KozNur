@@ -32,7 +32,7 @@ export default function Header({ healthy }) {
 
         <div className="flex items-center gap-3 sm:gap-5">
           <span className="hidden items-center gap-2 border-l border-white/10 pl-5 md:inline-flex">
-            <span className="micro-label text-white/40">Modal</span>
+            <span className="micro-label text-white/40">Model</span>
             <span className="num text-[0.72rem] text-instrument">ICDR 0–4</span>
           </span>
 
