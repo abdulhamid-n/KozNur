@@ -19,24 +19,13 @@ SAMPLES_DIR: Path = BACKEND_DIR / "samples"
 SAMPLES_MANIFEST: Path = SAMPLES_DIR / "manifest.json"
 
 # ---------------------------------------------------------------------------
-# Model (Phase A — wrap an already-trained, openly-licensed DR classifier)
+# Model — the live serving engine is the SE-ResNeXt50 ordinal-regression
+# ensemble built and loaded by model_runner.py (full provenance + upstream
+# license recorded in REFERENCE_MODEL.md). This id is only a human-readable
+# label surfaced in /health; the engine itself does NOT read this value.
 # ---------------------------------------------------------------------------
-# Kontawat/vit-diabetic-retinopathy-classification
-#   - ViT-Base/16, ViTForImageClassification, 5-class head.
-#   - License: apache-2.0 (permissive; commercial + redistribution OK with
-#     attribution). Attributed honestly here per ARCHITECTURE.md §4 / §6.
-#   - Training-data lineage: APTOS-2019-derived (open competition/research
-#     data, ARCHITECTURE.md §3). We do NOT claim it as our own dataset.
-#   - id2label = {0:"0",1:"1",2:"2",3:"3",4:"4"} — already in canonical ICDR
-#     order, so argmax index == ICDR grade. (The rafalosa fallback is NOT in
-#     ICDR order; do not swap without remapping by label string.)
-#
-# NOTE on the contract: ARCHITECTURE.md §4 names EfficientNet as the *Phase-B*
-# backbone WE fine-tune ourselves. For Phase A ("wrap now"), this ViT is the
-# cleanest verified, already-trained, ICDR-ordered option. The honest framing
-# in §6 still holds: this is a demo engine, not a measured performance claim.
 MODEL_ID: str = os.environ.get(
-    "KOZNUR_MODEL_ID", "Kontawat/vit-diabetic-retinopathy-classification"
+    "KOZNUR_MODEL_ID", "se_resnext50_32x4d_aptos2019_ensemble"
 )
 
 # Optional local weights/snapshot dir (set by scripts/download_weights.sh when
@@ -80,13 +69,13 @@ CORS_ORIGINS: list[str] = [
 ]
 
 # ---------------------------------------------------------------------------
-# Honest-claims guardrail (ARCHITECTURE.md §6). Surfaced in /health so the
-# wrapped model can never be misread as a measured KoʻzNur result.
+# Honest-claims guardrail. Surfaced in /health so the reference engine can
+# never be misread as a KoʻzNur-trained, KoʻzNur-measured result.
 # ---------------------------------------------------------------------------
-PHASE: str = "A"
-PHASE_A_DISCLAIMER: str = (
-    "Phase-A demo engine: wraps the openly-licensed, APTOS-trained "
-    "Kontawat/vit-diabetic-retinopathy-classification checkpoint (apache-2.0). "
-    "Triage / decision support, NOT diagnosis. Outputs are illustrative; no "
-    "KoʻzNur-measured accuracy is claimed until the Phase-B metrics.json exists."
+PHASE: str = "reference"
+MODEL_DISCLAIMER: str = (
+    "KoʻzNur reference engine: SE-ResNeXt50 ordinal-regression 5-fold ensemble "
+    "(APTOS-2019), ~0.92 QWK reference-level agreement. Triage / decision "
+    "support, NOT diagnosis. Predictions are real model outputs; a "
+    "KoʻzNur-measured metrics.json is pending."
 )

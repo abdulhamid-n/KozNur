@@ -91,11 +91,12 @@ def health() -> dict:
         "icdr_labels": config.ICDR_LABELS,
         "referable_threshold": config.REFERABLE_THRESHOLD,
         "preprocessing": {
-            "retina_crop": config.ENABLE_RETINA_CROP,
-            "ben_graham": config.ENABLE_BEN_GRAHAM,
-            "normalization": "ViTImageProcessor (resize 224, /255, mean=std=0.5)",
+            "scale_radius_crop": True,
+            "ben_graham": True,
+            "input_size": 256,
+            "normalization": "Ben-Graham scale-radius @288 → resize 256 → ImageNet mean/std",
         },
-        "disclaimer": config.PHASE_A_DISCLAIMER,
+        "disclaimer": config.MODEL_DISCLAIMER,
     }
 
 
