@@ -21,14 +21,22 @@ Triage — _tashxis emas_. Yakuniy qarorni har doim oftalmolog qabul qiladi.
 <br/>
 
 [![Jonli Demo](https://img.shields.io/badge/%E2%96%B6%20JONLI%20DEMO-3B82F6?style=for-the-badge&labelColor=0A1733)](https://detected-responses-bridal-complex.trycloudflare.com)
+&nbsp;&nbsp;
+[![Pitch Deck](https://img.shields.io/badge/%F0%9F%93%8A%20PITCH%20DECK-1D4ED8?style=for-the-badge&labelColor=0A1733)](pitch/KozNur-Pitch-Deck.pdf)
 
-<sub>Vaqtinchalik Cloudflare tunnel — taqdimot davomida faol. Lokal ishga tushirish boʻyicha pastga qarang.</sub>
+<sub>▶ Jonli demo — vaqtinchalik Cloudflare tunnel (taqdimot davomida faol) · 📊 <a href="pitch/KozNur-Pitch-Deck.pdf">13 slaydlik pitch taqdimoti (PDF)</a></sub>
 
 <br/>
 
 <img src="docs/img/mvp-home.png" alt="KoʻzNur — Retinal Screening Console" width="860"/>
 
 <sub><b>Team Zeno</b> · Tibbiyot yoʻnalishi · Umummilliy AI Hackathon — Guliston 2026</sub>
+
+<br/><br/>
+
+<a href="pitch/KozNur-Pitch-Deck.pdf"><img src="docs/img/pitch-cover.png" alt="KoʻzNur — Pitch Deck (13 slayd)" width="680"/></a>
+
+<sub>📊 Toʻliq pitch taqdimoti — <a href="pitch/KozNur-Pitch-Deck.pdf">KozNur-Pitch-Deck.pdf</a></sub>
 
 </div>
 
