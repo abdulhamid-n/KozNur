@@ -24,7 +24,7 @@ Triage — _tashxis emas_. Yakuniy qarorni har doim oftalmolog qabul qiladi.
 &nbsp;&nbsp;
 [![Pitch Deck](https://img.shields.io/badge/%F0%9F%93%8A%20PITCH%20DECK-1D4ED8?style=for-the-badge&labelColor=0A1733)](pitch/KozNur-Pitch-Deck.pdf)
 
-<sub>▶ Jonli demo — vaqtinchalik Cloudflare tunnel (taqdimot davomida faol) · 📊 <a href="pitch/KozNur-Pitch-Deck.pdf">13 slaydlik pitch taqdimoti (PDF)</a></sub>
+<sub>▶ Jonli demo — vaqtinchalik Cloudflare tunnel (taqdimot davomida faol) · 📊 <a href="pitch/KozNur-Pitch-Deck.pdf">Pitch taqdimoti — 14 slayd · 4K (PDF)</a></sub>
 
 <br/>
 
